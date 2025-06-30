@@ -67,7 +67,8 @@ int main(int argc, char *argv[]) {
     if (IsPP == true && (Year == 2017)) // using 2017 pp data corrections
       TrackEfficiencyPP2017 = new TrkEff2017pp(false, TrackEfficiencyPath);
     else if (IsPP == true && (Year == 2024)) // using 2024 pp data corrections
-      TrackEfficiencyPP2024 = new TrkEff2024ppref(false, TrackEfficiencyPath);
+      TrackEfficiencyPP2024 = new TrkEff2024ppref(true, TrackEfficiencyPath);
+      //  ^ first arg is isQuiet
   }
 
   TFile OutputFile(OutputFileName.c_str(), "RECREATE");

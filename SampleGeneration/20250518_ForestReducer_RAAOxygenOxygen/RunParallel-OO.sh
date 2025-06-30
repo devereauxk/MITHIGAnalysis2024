@@ -38,8 +38,8 @@ for FILEPATH in "$PATHSAMPLE"/HiForestMiniAOD*; do
         break
     fi
 
-    echo ./ProcessSingleOOFile.sh "$FILEPATH" $COUNTER $OUTPUT $DOGENLEVEL $ISDATA $SAMPLETYPE $DEBUGMODE &
-    ./ProcessSingleOOFile.sh "$FILEPATH" $COUNTER $OUTPUT $DOGENLEVEL $ISDATA $SAMPLETYPE $DEBUGMODE &
+    echo ./ProcessSingleFile-OO.sh "$FILEPATH" $COUNTER $OUTPUT $DOGENLEVEL $ISDATA $SAMPLETYPE $DEBUGMODE &
+    ./ProcessSingleFile-OO.sh "$FILEPATH" $COUNTER $OUTPUT $DOGENLEVEL $ISDATA $SAMPLETYPE $DEBUGMODE &
 
     wait_for_slot
     ((COUNTER++))
