@@ -162,6 +162,7 @@ int main(int argc, char *argv[]) {
       MChargedHadronRAA.PVFilter = MSkim.PVFilter;
       MChargedHadronRAA.mMaxL1HFAdcPlus = MHFAdc.mMaxL1HFAdcPlus;
       MChargedHadronRAA.mMaxL1HFAdcMinus = MHFAdc.mMaxL1HFAdcMinus;
+      MChargedHadronRAA.VZ_pf = MEvent.vz;
 
       if (IsPP == true) {
         if (IsData == true) {
@@ -206,8 +207,6 @@ int main(int argc, char *argv[]) {
         if (DoGenLevel == false) {
           // KD: apply track selection criteria that matches that used for efficiency files, if available
           if ((IsPP == true && (Year == 2024)) && ApplyTrackRejection == true && MTrack.trackingEfficiency2024ppref_selection(iTrack) == false)
-            continue;
-          if (ApplyTrackRejection == true && MTrack.PassChargedHadronPPStandardCuts(iTrack) == false)
             continue;
           if (abs(MTrack.trkEta->at(iTrack)) < 1.0 && MTrack.trkPt->at(iTrack) > leadingTrackPtEta1p0) {
             leadingTrackPtEta1p0 = MTrack.trkPt->at(iTrack);

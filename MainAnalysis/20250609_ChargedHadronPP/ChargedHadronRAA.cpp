@@ -17,6 +17,12 @@ using namespace std;
 #include "parameter.h" // Parameters for the analysis
 #include "utilities.h" // Utility functions for the analysis
 
+
+const Int_t nPtBins = 47;
+const Double_t pTBins_fine[nPtBins + 1] = {
+  0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 3.2, 4.0, 4.8, 5.6, 6.4, 7.2, 8.4, 9.6, 10.8, 12.0, 14.4, 15.8, 17.6, 19.2, 22.0, 24.0, 26.2, 28.8, 32.0, 35.2, 38.0, 41.6, 43.6, 48.0, 54.0, 60.8, 73.6, 86.4, 103.6, 120.8, 140.0, 165.0, 250.0, 400.0
+};
+
 //============================================================//
 // Function to check for configuration errors
 //============================================================//
@@ -36,7 +42,7 @@ bool eventSelection(const ChargedHadronRAATreeMessenger *MChargedHadronRAA, TH1D
   if (MChargedHadronRAA->isFakeVtx) return false;
   hNEvtPassCuts->Fill(4); // Not a fake vertex
 
-  if (fabs(MChargedHadronRAA->VZ) >= 15.0) return false;
+  if (fabs(MChargedHadronRAA->VZ_pf) >= 15.0) return false;
   hNEvtPassCuts->Fill(5); // Vertex Z position within range
 
   if (MChargedHadronRAA->nTracksVtx < 0) return false;
@@ -51,24 +57,28 @@ bool trackSelection(const ChargedHadronRAATreeMessenger *MChargedHadronRAA, unsi
 
   hNTrkPassCuts->Fill(1); // Total tracks
 
+  if (fabs(MChargedHadronRAA->trkCharge->at(j)) != 1) return false;
+  hNTrkPassCuts->Fill(2); // Charge = 1
+
   if (MChargedHadronRAA->highPurity->at(j) == false) return false;
-  hNTrkPassCuts->Fill(2); // High purity
-
-  double RelativeUncertainty = MChargedHadronRAA->trkPtError->at(j) / MChargedHadronRAA->trkPt->at(j);
-  if (MChargedHadronRAA->trkPt->at(j) > 10 && RelativeUncertainty > 0.1) return false;
-  hNTrkPassCuts->Fill(3); // Relative uncertainty < 10%
-
-  if (fabs(MChargedHadronRAA->trkDxyAssociatedVtx->at(j)) / MChargedHadronRAA->trkDxyErrAssociatedVtx->at(j) > 3) return false;
-  hNTrkPassCuts->Fill(4); // Dxy < 3 sigma
-
-  if(fabs(MChargedHadronRAA->trkDzAssociatedVtx->at(j)) / MChargedHadronRAA->trkDzErrAssociatedVtx->at(j) > 3) return false;
-  hNTrkPassCuts->Fill(5); // Dz < 3 sigma
+  hNTrkPassCuts->Fill(3); // High purity
 
   if (fabs(MChargedHadronRAA->trkEta->at(j)) > 1) return false;
-  hNTrkPassCuts->Fill(6); // Eta < 1, changed from 2.4
+  hNTrkPassCuts->Fill(4); // Eta < 1, changed from 2.4
+
+  if (MChargedHadronRAA->trkPt->at(j) < 0.1) return false; // vipuls
+  double RelativeUncertainty = MChargedHadronRAA->trkPtError->at(j) / MChargedHadronRAA->trkPt->at(j);
+  if (MChargedHadronRAA->trkPt->at(j) > 10 && RelativeUncertainty > 0.1) return false;
+  hNTrkPassCuts->Fill(5); // Relative uncertainty < 10%
+
+  if (fabs(MChargedHadronRAA->trkDxyAssociatedVtx->at(j)) / MChargedHadronRAA->trkDxyErrAssociatedVtx->at(j) > 3) return false;
+  hNTrkPassCuts->Fill(6); // Dxy < 3 sigma
+
+  if(fabs(MChargedHadronRAA->trkDzAssociatedVtx->at(j)) / MChargedHadronRAA->trkDzErrAssociatedVtx->at(j) > 3) return false;
+  hNTrkPassCuts->Fill(7); // Dz < 3 sigma
 
   if (MChargedHadronRAA->trkPt->at(j) > 500) return false;
-  hNTrkPassCuts->Fill(7); // pT < 500 GeV/c
+  hNTrkPassCuts->Fill(8); // pT < 500 GeV/c
 
   return true;
 }
@@ -79,6 +89,7 @@ public:
   TH1D *hTrkPt;
   TH2D *hTrkPtEta;
   TH1D *hNEvtPassCuts, *hNTrkPassCuts;
+  TH1D *hVZ, *hVZ_pf;
   ChargedHadronRAATreeMessenger *MChargedHadronRAA;
   string title;
 
@@ -98,10 +109,13 @@ public:
   void analyze(Parameters &par) {
     outf->cd();
 
-    hTrkPt = new TH1D(Form("hTrkPt%s", title.c_str()), "", 100, 0, 20);
+    hTrkPt = new TH1D(Form("hTrkPt%s", title.c_str()), "", nPtBins, pTBins_fine);
     hTrkPt->Sumw2();
-    hTrkPtEta = new TH2D(Form("hTrkPtEta%s", title.c_str()), "", 40, 0, 20, 50, -4.0, 4.0);
+    hTrkPtEta = new TH2D(Form("hTrkPtEta%s", title.c_str()), "", nPtBins, pTBins_fine, 50, -4.0, 4.0);
     hTrkPtEta->Sumw2();
+
+    hVZ = new TH1D(Form("hVZ%s", title.c_str()), "Vertex Z position", 100, -30.0, 30.0);
+    hVZ_pf = new TH1D(Form("hVZ_pf%s", title.c_str()), "Vertex Z position (PF)", 100, -30.0, 30.0);
 
     hNEvtPassCuts = new TH1D("hNEvtPassCuts", "Number of events passing cuts", 6, 0.5, 6.5);
     hNEvtPassCuts->GetXaxis()->SetBinLabel(1, "Total Events");
@@ -112,14 +126,15 @@ public:
     hNEvtPassCuts->GetXaxis()->SetBinLabel(6, "+ nTrk>=0");
     hNEvtPassCuts->Sumw2();
 
-    hNTrkPassCuts = new TH1D("hNTrkPassCuts", "Number of tracks passing cuts", 7, 0.5, 7.5);
+    hNTrkPassCuts = new TH1D("hNTrkPassCuts", "Number of tracks passing cuts", 8, 0.5, 8.5);
     hNTrkPassCuts->GetXaxis()->SetBinLabel(1, "Total Tracks");
-    hNTrkPassCuts->GetXaxis()->SetBinLabel(2, "+ High Purity");
-    hNTrkPassCuts->GetXaxis()->SetBinLabel(3, "+ pT > 10 && Rel pT Error < 10%");
-    hNTrkPassCuts->GetXaxis()->SetBinLabel(4, "+ Dxy < 3 sigma");
-    hNTrkPassCuts->GetXaxis()->SetBinLabel(5, "+ Dz < 3 sigma");
-    hNTrkPassCuts->GetXaxis()->SetBinLabel(6, "+ Eta < 1");
-    hNTrkPassCuts->GetXaxis()->SetBinLabel(7, "+ pT < 500 GeV/c");
+    hNTrkPassCuts->GetXaxis()->SetBinLabel(2, "+ abs(charge)=1");
+    hNTrkPassCuts->GetXaxis()->SetBinLabel(3, "+ High Purity");
+    hNTrkPassCuts->GetXaxis()->SetBinLabel(4, "+ Eta < 1");
+    hNTrkPassCuts->GetXaxis()->SetBinLabel(5, "+ pT > 10 && Rel pT Error < 10%");
+    hNTrkPassCuts->GetXaxis()->SetBinLabel(6, "+ Dxy < 3 sigma");
+    hNTrkPassCuts->GetXaxis()->SetBinLabel(7, "+ Dz < 3 sigma");
+    hNTrkPassCuts->GetXaxis()->SetBinLabel(8, "+ pT < 500 GeV/c");
     hNTrkPassCuts->Sumw2();
 
     par.printParameters();
@@ -142,6 +157,10 @@ public:
         continue;
       }
 
+      // fill vertex histograms
+      if (fabs(MChargedHadronRAA->VZ) < 15) hVZ->Fill(MChargedHadronRAA->VZ);
+      if (fabs(MChargedHadronRAA->VZ_pf) < 15) hVZ_pf->Fill(MChargedHadronRAA->VZ_pf);
+
       // track-level
       for (unsigned long j = 0; j < MChargedHadronRAA->trkPt->size(); j++) {
 
@@ -155,6 +174,7 @@ public:
         if (!trackSelection(MChargedHadronRAA, j, hNTrkPassCuts)) continue;
 
         // fill histograms
+        hTrkPt->Fill(MChargedHadronRAA->trkPt->at(j), trkWeight);
         hTrkPtEta->Fill(MChargedHadronRAA->trkPt->at(j), MChargedHadronRAA->trkEta->at(j), trkWeight);
         
       } // end of track loop
@@ -172,6 +192,8 @@ public:
     smartWrite(hTrkPtEta);
     smartWrite(hNEvtPassCuts);
     smartWrite(hNTrkPassCuts);
+    smartWrite(hVZ);
+    smartWrite(hVZ_pf);
   }
 
 private:
@@ -180,6 +202,8 @@ private:
     delete hTrkPtEta;
     delete hNEvtPassCuts;
     delete hNTrkPassCuts;
+    delete hVZ;
+    delete hVZ_pf;
   }
 };
 

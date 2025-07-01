@@ -2378,12 +2378,19 @@ bool PPTrackTreeMessenger::PassChargedHadronPPStandardCuts(int index)
 
 bool PPTrackTreeMessenger::trackingEfficiency2024ppref_selection(int index)
 {
+   //FIXME: currently this matches Vipul analysis
    if(index >= nTrk)
+      return false;
+
+   if(abs(trkCharge->at(index)) != 1)
       return false;
 
    if(highPurity->at(index) == false)
       return false;
-   //FIXME: currently this matches Vipul analysis
+   
+   if (trkPt->at(index) < 0.1)
+      return false;
+   
    double RelativeUncertainty = trkPtError->at(index)/ trkPt->at(index);
    if(trkPt->at(index) > 10 && RelativeUncertainty > 0.1)
       return false;
@@ -3732,6 +3739,7 @@ bool ChargedHadronRAATreeMessenger::Initialize(bool Debug)
    Tree->SetBranchAddress("VX", &VX);
    Tree->SetBranchAddress("VY", &VY);
    Tree->SetBranchAddress("VZ", &VZ);
+   Tree->SetBranchAddress("VZ_pf", &VZ_pf);
    Tree->SetBranchAddress("VXError", &VXError);
    Tree->SetBranchAddress("VYError", &VYError);
    Tree->SetBranchAddress("VZError", &VZError);
@@ -3864,6 +3872,7 @@ bool ChargedHadronRAATreeMessenger::SetBranch(TTree *T, bool Debug)
    Tree->Branch("VX",                         &VX, "VX/F");
    Tree->Branch("VY",                         &VY, "VY/F");
    Tree->Branch("VZ",                         &VZ, "VZ/F");
+   Tree->Branch("VZ_pf",                      &VZ_pf, "VZ_pf/F");
    Tree->Branch("VXError",                    &VXError, "VXError/F");
    Tree->Branch("VYError",                    &VYError, "VYError/F");
    Tree->Branch("VZError",                    &VZError, "VZError/F");
@@ -3956,6 +3965,7 @@ void ChargedHadronRAATreeMessenger::Clear()
    VX = 0.;
    VY = 0.;
    VZ = 0.;
+   VZ_pf = 0.;
    VXError = 0.;
    VYError = 0.;
    VZError = 0.;

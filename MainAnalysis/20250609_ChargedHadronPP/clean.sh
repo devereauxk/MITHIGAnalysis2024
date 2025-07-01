@@ -3,7 +3,7 @@ rm ChargedHadronRAA
 rm ExecuteChargedHadronRAA
 rm -rf ../../CommonCode/binary/
 rm -rf ../../CommonCode/library/
-rm *.root
+rm output/*.root
 
 cd ../../
 source SetupAnalysis.sh
