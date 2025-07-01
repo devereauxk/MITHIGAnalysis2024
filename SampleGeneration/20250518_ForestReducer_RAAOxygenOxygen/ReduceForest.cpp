@@ -21,6 +21,7 @@ using namespace std;
 
 #include "include/cent_OO_hijing_PF.h"
 #include "include/skimSelectionBits_OO_PP.h"
+#include "include/parseFSCandPPSInfo.h"
 
 bool logical_or_vectBool(std::vector<bool> *vec) {
   return std::any_of(vec->begin(), vec->end(), [](bool b) { return b; });
@@ -58,8 +59,12 @@ int main(int argc, char *argv[]) {
   int sampleType = CL.GetInteger("sampleType", 0);
   string PFTreeName = CL.Get("PFTree", "particleFlowAnalyser/pftree");
   string ZDCTreeName = CL.Get("ZDCTree", "zdcanalyzer/zdcrechit");
+  string PPSTreeName = CL.Get("PPSTree", "ppsanalyzer/ppstracks");
+  string FSCTreeName = CL.Get("FSCTree", "fscanalyzer/fscdigi");
   bool HideProgressBar = CL.GetBool("HideProgressBar", false);
   bool DebugMode = CL.GetBool("DebugMode", false);
+  bool includeFSCandPPSMode = CL.GetBool("includeFSCandPPSMode", false);
+  int saveTriggerBitsMode = CL.GetInt("saveTriggerBitsMode", 0);
 
   TrkEff2017pp *TrackEfficiencyPP2017 = nullptr;
   TrkEff2024ppref *TrackEfficiencyPP2024 = nullptr;
@@ -67,15 +72,14 @@ int main(int argc, char *argv[]) {
     if (IsPP == true && (Year == 2017)) // using 2017 pp data corrections
       TrackEfficiencyPP2017 = new TrkEff2017pp(false, TrackEfficiencyPath);
     else if (IsPP == true && (Year == 2024)) // using 2024 pp data corrections
-      TrackEfficiencyPP2024 = new TrkEff2024ppref(true, TrackEfficiencyPath);
-      //  ^ first arg is isQuiet
+      TrackEfficiencyPP2024 = new TrkEff2024ppref(false, TrackEfficiencyPath);
   }
 
   TFile OutputFile(OutputFileName.c_str(), "RECREATE");
   TTree Tree("Tree", Form("Tree for UPC Dzero analysis (%s)", VersionString.c_str()));
   TTree InfoTree("InfoTree", "Information");
   ChargedHadronRAATreeMessenger MChargedHadronRAA;
-  MChargedHadronRAA.SetBranch(&Tree, DebugMode);
+  MChargedHadronRAA.SetBranch(&Tree, DebugMode, includeFSCandPPSMode, saveTriggerBitsMode);
 
   for (string InputFileName : InputFileNames) {
     TFile InputFile(InputFileName.c_str());
@@ -88,6 +92,8 @@ int main(int argc, char *argv[]) {
     HFAdcMessenger MHFAdc(InputFile);              // HFAdcana/adc
     ZDCTreeMessenger MZDC(InputFile, ZDCTreeName); // zdcanalyzer/zdcrechit
     TriggerTreeMessenger MTrigger(InputFile);      // hltanalysis/HltTree
+    PPSTreeMessenger MPPS(InputFile, PPSTreeName); // ppsanalyzer/ppstracks
+    FSCTreeMessenger MFSC(InputFile, FSCTreeName); // fscanalyzer/fscdigi
     // METFilterTreeMessenger MMETFilter(InputFile); // l1MetFilterRecoTree/MetFilterRecoTree
 
     int EntryCount = MEvent.GetEntries() * Fraction;
@@ -112,6 +118,8 @@ int main(int argc, char *argv[]) {
 
       MHFAdc.GetEntry(iE);
       MZDC.GetEntry(iE);
+      MPPS.GetEntry(iE);
+      MFSC.GetEntry(iE);
       MTrigger.GetEntry(iE);
       // MMETFilter.GetEntry(iE);
 
@@ -123,6 +131,8 @@ int main(int argc, char *argv[]) {
       MChargedHadronRAA.Lumi = MEvent.Lumi;
       MChargedHadronRAA.Event = MEvent.Event;
       MChargedHadronRAA.hiHF_pf = MEvent.hiHF_pf;
+      MChargedHadronRAA.hiHFPlus_pf = MEvent.hiHFPlus_pf;
+      MChargedHadronRAA.hiHFMinus_pf = MEvent.hiHFMinus_pf;
       if (IsPP == false)
         MChargedHadronRAA.hiBin = getHiBinFromhiHF(MEvent.hiHF_pf);
       else
@@ -162,7 +172,6 @@ int main(int argc, char *argv[]) {
       MChargedHadronRAA.PVFilter = MSkim.PVFilter;
       MChargedHadronRAA.mMaxL1HFAdcPlus = MHFAdc.mMaxL1HFAdcPlus;
       MChargedHadronRAA.mMaxL1HFAdcMinus = MHFAdc.mMaxL1HFAdcMinus;
-      MChargedHadronRAA.VZ_pf = MEvent.vz;
 
       if (IsPP == true) {
         if (IsData == true) {
@@ -179,6 +188,17 @@ int main(int argc, char *argv[]) {
       } // end of IsPP
       else { // !IsPP
         if (IsData == true) {
+          if (saveTriggerBitsMode==2) { // pO triggers
+            MChargedHadronRAA.HLT_OxyZeroBias_v1 = MTrigger.CheckTriggerStartWith("HLT_OxyZeroBias_v1");
+            MChargedHadronRAA.HLT_OxyZDC1nOR_v1= MTrigger.CheckTriggerStartWith("HLT_OxyZDC1nOR_v1");
+            MChargedHadronRAA.HLT_OxySingleMuOpen_NotMBHF2OR_v1= MTrigger.CheckTriggerStartWith("HLT_OxySingleMuOpen_NotMBHF2OR_v1");
+            MChargedHadronRAA.HLT_OxySingleJet8_ZDC1nAsymXOR_v1= MTrigger.CheckTriggerStartWith("HLT_OxySingleJet8_ZDC1nAsymXOR_v1");
+            MChargedHadronRAA.HLT_OxyNotMBHF2_v1= MTrigger.CheckTriggerStartWith("HLT_OxyNotMBHF2_v1");
+            MChargedHadronRAA.HLT_OxyZeroBias_SinglePixelTrackLowPt_MaxPixelCluster400_v1= MTrigger.CheckTriggerStartWith("HLT_OxyZeroBias_SinglePixelTrackLowPt_MaxPixelCluster400_v1");
+            MChargedHadronRAA.HLT_OxyZeroBias_MinPixelCluster400_v1= MTrigger.CheckTriggerStartWith("HLT_OxyZeroBias_MinPixelCluster400_v1");
+            MChargedHadronRAA.HLT_MinimumBiasHF_OR_BptxAND_v1= MTrigger.CheckTriggerStartWith("HLT_MinimumBiasHF_OR_BptxAND_v1");
+            MChargedHadronRAA.HLT_MinimumBiasHF_AND_BptxAND_v1= MTrigger.CheckTriggerStartWith("HLT_MinimumBiasHF_AND_BptxAND_v1");
+          }
         } // end of !IsPP && IsData
         else { // !IsPP && !IsData
         }
@@ -207,6 +227,8 @@ int main(int argc, char *argv[]) {
         if (DoGenLevel == false) {
           // KD: apply track selection criteria that matches that used for efficiency files, if available
           if ((IsPP == true && (Year == 2024)) && ApplyTrackRejection == true && MTrack.trackingEfficiency2024ppref_selection(iTrack) == false)
+            continue;
+          if (ApplyTrackRejection == true && MTrack.PassChargedHadronPPStandardCuts(iTrack) == false)
             continue;
           if (abs(MTrack.trkEta->at(iTrack)) < 1.0 && MTrack.trkPt->at(iTrack) > leadingTrackPtEta1p0) {
             leadingTrackPtEta1p0 = MTrack.trkPt->at(iTrack);
@@ -273,6 +295,30 @@ int main(int argc, char *argv[]) {
           MChargedHadronRAA.Allchi2Vtx->push_back(MTrack.chi2Vtx->at(iDebVtx));
           MChargedHadronRAA.AllndofVtx->push_back(MTrack.ndofVtx->at(iDebVtx));
           MChargedHadronRAA.AllptSumVtx->push_back(MTrack.ptSumVtx->at(iDebVtx));
+        }
+      }
+
+      ////////////////////////////
+      /// PPS & FSC variables ////
+      ////////////////////////////
+
+      if (includeFSCandPPSMode) {
+        // PPS variables
+        if (MPPS.n > PPSMAXN) {
+          std::cout << "ERROR: in the PPS tree of the forest n > PPSMAXN; skipping PPS information filling" << std::endl;
+        } else {
+          for (int iPPS = 0; iPPS < MPPS.n ; iPPS++) {
+            fillPPSInfo(MChargedHadronRAA, MPPS, iPPS);
+          }
+        }
+
+        // FSC variables
+        if (MPPS.n > FSCMAXN) {
+          std::cout << "ERROR: in the FSC tree of the forest n > FSCMAXN; skipping FSC information filling" << std::endl;
+        } else {
+          for (int iFSC = 0; iFSC < MFSC.n ; iFSC++) {
+            fillFSCInfo(MChargedHadronRAA, MFSC, iFSC);
+          }
         }
       }
 

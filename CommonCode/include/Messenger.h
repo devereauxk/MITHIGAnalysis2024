@@ -16,6 +16,8 @@
 #define TRACKCOUNTMAX 20000
 #define PLANEMAX 200
 #define MUMAX 50
+#define PPSMAXN 56
+#define FSCMAXN 50
 
 class HiEventTreeMessenger;
 class METFilterTreeMessenger;
@@ -33,6 +35,8 @@ class SingleMuTreeMessenger;
 class PbPbTrackTreeMessenger;
 class PbPbUPCTrackTreeMessenger;
 class ZDCTreeMessenger;
+class PPSTreeMessenger;
+class FSCTreeMessenger;
 class HFAdcMessenger;
 class DzeroTreeMessenger;
 class DzeroGenTreeMessenger;
@@ -770,6 +774,64 @@ public:
    bool GetEntry(int iEntry);
 };
 
+class PPSTreeMessenger
+{
+public:
+   TTree *Tree;
+   int n;
+   int zside[PPSMAXN];
+   int station[PPSMAXN];
+   float x[PPSMAXN];
+   float y[PPSMAXN];
+
+public:
+   PPSTreeMessenger(TFile &File, std::string TreeName = "ppsanalyzer/ppstracks");
+   PPSTreeMessenger(TFile *File, std::string TreeName = "ppsanalyzer/ppstracks");
+   PPSTreeMessenger(TTree *PPSTree);
+   bool Initialize(TTree *PPSTree);
+   bool Initialize();
+   bool GetEntry(int iEntry);
+};
+
+class FSCTreeMessenger
+{
+public:
+   TTree *Tree;
+   int n;
+   int zside[FSCMAXN];
+   int section[FSCMAXN];
+   int channel[FSCMAXN];
+
+   int adcTs0[FSCMAXN];
+   int adcTs1[FSCMAXN];
+   int adcTs2[FSCMAXN];
+   int adcTs3[FSCMAXN];
+   int adcTs4[FSCMAXN];
+   int adcTs5[FSCMAXN];
+
+   float chargefCTs0[FSCMAXN];
+   float chargefCTs1[FSCMAXN];
+   float chargefCTs2[FSCMAXN];
+   float chargefCTs3[FSCMAXN];
+   float chargefCTs4[FSCMAXN];
+   float chargefCTs5[FSCMAXN];
+
+   int tdcTs0[FSCMAXN];
+   int tdcTs1[FSCMAXN];
+   int tdcTs2[FSCMAXN];
+   int tdcTs3[FSCMAXN];
+   int tdcTs4[FSCMAXN];
+   int tdcTs5[FSCMAXN];
+
+public:
+   FSCTreeMessenger(TFile &File, std::string TreeName = "fscanalyzer/fscdigi");
+   FSCTreeMessenger(TFile *File, std::string TreeName = "fscanalyzer/fscdigi");
+   FSCTreeMessenger(TTree *FSCTree);
+   bool Initialize(TTree *FSCTree);
+   bool Initialize();
+   bool GetEntry(int iEntry);
+};
+
 class HFAdcMessenger
 {
 public:
@@ -1046,6 +1108,17 @@ public:
    bool passHFAND_6p06p0_Online;
    bool passHFOR_8p0_Offline;
    bool passHFOR_8p0_Online;
+
+   // Trigger bits
+   bool HLT_OxyZeroBias_v1;
+   bool HLT_OxyZDC1nOR_v1;
+   bool HLT_OxySingleMuOpen_NotMBHF2OR_v1;
+   bool HLT_OxySingleJet8_ZDC1nAsymXOR_v1;
+   bool HLT_OxyNotMBHF2_v1;
+   bool HLT_OxyZeroBias_SinglePixelTrackLowPt_MaxPixelCluster400_v1;
+   bool HLT_OxyZeroBias_MinPixelCluster400_v1;
+   bool HLT_MinimumBiasHF_OR_BptxAND_v1;
+   bool HLT_MinimumBiasHF_AND_BptxAND_v1;
    
    std::vector<float> *trkPt;
    std::vector<float> *trkPhi;
@@ -1080,6 +1153,38 @@ public:
    std::vector<float> *AllndofVtx;
    std::vector<float> *AllptSumVtx;
 
+   // PPS tracks variables
+   std::vector<int> *PPS_zside;
+   std::vector<int> *PPS_station;
+   std::vector<float> *PPS_x;
+   std::vector<float> *PPS_y;
+
+   //FSC variables
+   std::vector<int> *FSC_zside;
+   std::vector<int> *FSC_section;
+   std::vector<int> *FSC_channel;
+
+   std::vector<int> *FSC_adcTs0;
+   std::vector<int> *FSC_adcTs1;
+   std::vector<int> *FSC_adcTs2;
+   std::vector<int> *FSC_adcTs3;
+   std::vector<int> *FSC_adcTs4;
+   std::vector<int> *FSC_adcTs5;
+
+   std::vector<float> *FSC_chargefCTs0;
+   std::vector<float> *FSC_chargefCTs1;
+   std::vector<float> *FSC_chargefCTs2;
+   std::vector<float> *FSC_chargefCTs3;
+   std::vector<float> *FSC_chargefCTs4;
+   std::vector<float> *FSC_chargefCTs5;
+
+   std::vector<int> *FSC_tdcTs0;
+   std::vector<int> *FSC_tdcTs1;
+   std::vector<int> *FSC_tdcTs2;
+   std::vector<int> *FSC_tdcTs3;
+   std::vector<int> *FSC_tdcTs4;
+   std::vector<int> *FSC_tdcTs5;
+
 public:   // Derived quantities
    //bool GoodPhotonuclear; //FIXME: currently not implemented
 
@@ -1087,17 +1192,18 @@ private:
    bool WriteMode;
    bool Initialized;
    bool DebugMode;
+   bool includeFSCandPPSMode;
 
 public:
-   ChargedHadronRAATreeMessenger(TFile &File, std::string TreeName = "tree", bool Debug = false);
-   ChargedHadronRAATreeMessenger(TFile *File, std::string TreeName = "tree", bool Debug = false);
-   ChargedHadronRAATreeMessenger(TTree *ChargedHadRAATree = nullptr, bool Debug = false);
+   ChargedHadronRAATreeMessenger(TFile &File, std::string TreeName = "tree", bool Debug = false, bool includeFSCandPPS = false);
+   ChargedHadronRAATreeMessenger(TFile *File, std::string TreeName = "tree", bool Debug = false, bool includeFSCandPPS = false);
+   ChargedHadronRAATreeMessenger(TTree *ChargedHadRAATree = nullptr, bool Debug = false, bool includeFSCandPPS = false);
    ~ChargedHadronRAATreeMessenger();
-   bool Initialize(TTree *ChargedHadRAATree, bool Debug = false);
-   bool Initialize(bool Debug = false);
+   bool Initialize(TTree *ChargedHadRAATree, bool Debug = false, bool includeFSCandPPS = false);
+   bool Initialize(bool Debug = false, bool includeFSCandPPS = false);
    int GetEntries();
    bool GetEntry(int iEntry);
-   bool SetBranch(TTree *T, bool Debug = false);
+   bool SetBranch(TTree *T, bool Debug = false, bool includeFSCandPPS = false);
    void Clear();
    //void CopyNonTrack(ChargedHadronRAATreeMessenger &M);
    bool FillEntry();
