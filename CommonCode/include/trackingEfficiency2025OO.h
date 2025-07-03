@@ -108,7 +108,7 @@ TrkEff2025OO::TrkEff2025OO(bool isQuiet_, std::string filePath){
     
     trkEffSecMul = TFile::Open( (filePath + "Eff_OO_2025_PythiaHijing_NopU_Nominal.root").c_str(),"open");
 
-    trkFak = TFile::Open( (filePath + "Fake_OO_2025_Hijing_NopU_Nominal.root").c_str(),"open");
+    trkFak = TFile::Open( (filePath + "Eff_OO_2025_Hijing_NopU_Nominal.root").c_str(),"open");
     
     if( !(trkEffSecMul->IsOpen() ) ){
       std::cout << "WARNING, COULD NOT FIND TRACK EFFICIENCY FILE FOR GENERAL TRACKS!" << std::endl;

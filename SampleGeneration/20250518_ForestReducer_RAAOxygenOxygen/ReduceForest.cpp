@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
     else if (IsPP == true && (Year == 2024)) // using 2024 pp data corrections
       TrackEfficiencyPP2024 = new TrkEff2024ppref(true, TrackEfficiencyPath);
     else if (IsPP == false && (Year == 2025)) // Using OO MC corrections
-      TrackEfficiencyOO2025 = new TrkEff2025OO(false, TrackEfficiencyPath);
+      TrackEfficiencyOO2025 = new TrkEff2025OO(true, TrackEfficiencyPath);
   }
 
   TFile OutputFile(OutputFileName.c_str(), "RECREATE");
@@ -178,6 +178,11 @@ int main(int argc, char *argv[]) {
       MChargedHadronRAA.mMaxL1HFAdcMinus = MHFAdc.mMaxL1HFAdcMinus;
       MChargedHadronRAA.VZ_pf = MEvent.vz;
 
+      // event selection correction calculation
+      double eventCorrection = 1.0;
+      // TODO: KD to implement, right now weight fills as 1
+      MChargedHadronRAA.eventWeight = eventCorrection;
+
       if (IsPP == true) {
         if (IsData == true) {
           int HLT_PPRefZeroBias_v6 = MTrigger.CheckTriggerStartWith("HLT_PPRefZeroBias_v6");
@@ -233,7 +238,7 @@ int main(int argc, char *argv[]) {
           // KD: apply track selection criteria that matches that used for efficiency files, if available
           if ((IsPP == true && (Year == 2024)) && ApplyTrackRejection == true && MTrack.trackingEfficiency2024ppref_selection(iTrack) == false)
             continue;
-          if ((IsPP == false && (Year == 2025)) && ApplyTrackRejection == true && MTrack.trackingEfficiency2025ppref_selection(iTrack) == false)
+          if ((IsPP == false && (Year == 2025)) && ApplyTrackRejection == true && MTrack.trackingEfficiency2024ppref_selection(iTrack) == false)
             continue; // Using ppref track selection for OO for now
           if (abs(MTrack.trkEta->at(iTrack)) < 1.0 && MTrack.trkPt->at(iTrack) > leadingTrackPtEta1p0) {
             leadingTrackPtEta1p0 = MTrack.trkPt->at(iTrack);
@@ -280,7 +285,6 @@ int main(int argc, char *argv[]) {
             TrackCorrection = TrackEfficiencyPP2024->getCorrection(trkPt, trkEta);
           else if (IsPP == false && (Year == 2025))
             TrackCorrection = TrackEfficiencyOO2025->getCorrection(trkPt, trkEta);
-          else
         } // end of if on DoGenLevel == false
         MChargedHadronRAA.trackWeight->push_back(TrackCorrection);
       } // end of loop over tracks (gen or reco)
