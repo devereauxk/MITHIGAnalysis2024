@@ -3878,8 +3878,6 @@ bool ChargedHadronRAATreeMessenger::Initialize(int saveTriggerBits, bool Debug, 
    if(Tree == nullptr)
       return false;
 
-   std::cout<<"save trigger bits mode: "<<saveTriggerBits<<std::endl;
-
    Initialized = true;
    DebugMode = Debug;
    includeFSCandPPSMode = includeFSCandPPS;

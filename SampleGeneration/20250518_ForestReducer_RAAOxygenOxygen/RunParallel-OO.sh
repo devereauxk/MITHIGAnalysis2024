@@ -13,11 +13,11 @@ DEBUGMODE=1
 INCLUDEPPSANDFSC=1
 
 NAME="${DATE}_pO_PhysicsIonPhysics0_393952_test1"
-PATHSAMPLE="/eos/cms/store/group/phys_heavyions/jdlang/Run3_OO_2025Data_QuickForest/pO_PhysicsIonPhysics0_393952/crab_pO_PhysicsIonPhysics0_393952/250701_063441/0001"
+PATHSAMPLE="/eos/cms/store/group/phys_heavyions/jdlang/Run3_OO_2025Data_QuickForest/pO_PhysicsIonPhysics0_393952/crab_pO_PhysicsIonPhysics0_393952/250701_063441/0000"
 
 # set your output directory here
-OUTPUT="/data00/bakovacs/OOsamples/Skims/output_$NAME"
-MERGEDOUTPUT="/data00/bakovacs/OOsamples/Skims/$NAME.root"
+OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME"
+MERGEDOUTPUT="/data00/kdeverea/OOsamples/Skims/$NAME.root"
 rm $MERGEDOUTPUT &> /dev/null
 
 # Function to monitor active processes
