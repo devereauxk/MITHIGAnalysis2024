@@ -320,7 +320,7 @@ void plotEventSel(const char* input =   "output/output.root", const char* output
     plotSimple(
         {hNEvtPassCuts}, "NEvtPassCuts", {"NEvtPassCuts"},
         "", -1, -1,
-        "Counts", 89000, 91000,
+        "Counts", 0, 1e5,
         false, false,
         true
     );
@@ -329,7 +329,7 @@ void plotEventSel(const char* input =   "output/output.root", const char* output
     plotSimple(
         {hNTrkPassCuts}, "NTrkPassCuts", {"NTrkPassCuts"},
         "", -1, -1,
-        "Counts", 2000e3, 11000e3,
+        "Counts", -1, -1,
         false, false,
         true
     );

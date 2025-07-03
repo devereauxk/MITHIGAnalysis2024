@@ -28,6 +28,28 @@ const Double_t pTBins_fine[nPtBins + 1] = {
 //============================================================//
 bool checkError(const Parameters &par) { return false; }
 
+bool trackSelection_nohist(const ChargedHadronRAATreeMessenger *MChargedHadronRAA, unsigned long j) {
+
+  if (j >= MChargedHadronRAA->trkPt->size()) return false;
+
+  if (fabs(MChargedHadronRAA->trkCharge->at(j)) != 1) return false;
+
+  if (MChargedHadronRAA->highPurity->at(j) == false) return false;
+
+  if (fabs(MChargedHadronRAA->trkEta->at(j)) > 1) return false;
+
+  if (MChargedHadronRAA->trkPt->at(j) < 0.1) return false; // vipuls
+  double RelativeUncertainty = MChargedHadronRAA->trkPtError->at(j) / MChargedHadronRAA->trkPt->at(j);
+  if (MChargedHadronRAA->trkPt->at(j) > 10 && RelativeUncertainty > 0.1) return false;
+
+  if (fabs(MChargedHadronRAA->trkDxyAssociatedVtx->at(j)) / MChargedHadronRAA->trkDxyErrAssociatedVtx->at(j) > 3) return false;
+
+  if(fabs(MChargedHadronRAA->trkDzAssociatedVtx->at(j)) / MChargedHadronRAA->trkDzErrAssociatedVtx->at(j) > 3) return false;
+
+  if (MChargedHadronRAA->trkPt->at(j) > 500) return false;
+
+  return true;
+}
 
 bool eventSelection(const ChargedHadronRAATreeMessenger *MChargedHadronRAA, TH1D* hNEvtPassCuts) {
 
@@ -36,17 +58,28 @@ bool eventSelection(const ChargedHadronRAATreeMessenger *MChargedHadronRAA, TH1D
   if (MChargedHadronRAA->ClusterCompatibilityFilter == false) return false;
   hNEvtPassCuts->Fill(2); // Centrality filter
 
+  // leading track pT cut, ensures there is at least one track with pT > 3
+  bool leadingTrackFound = false;
+  for (unsigned long j = 0; j < MChargedHadronRAA->trkPt->size(); j++) {
+    if (trackSelection_nohist(MChargedHadronRAA, j) && MChargedHadronRAA->trkPt->at(j) > 3.0) {
+      hNEvtPassCuts->Fill(3); // Leading track pT cut
+      leadingTrackFound = true;
+      break;
+    }
+  }
+  if (!leadingTrackFound) return false; // No leading track found
+
   if (MChargedHadronRAA->PVFilter == false) return false;
-  hNEvtPassCuts->Fill(3); // Primary vertex filter
+  hNEvtPassCuts->Fill(4); // Primary vertex filter
 
   if (MChargedHadronRAA->isFakeVtx) return false;
-  hNEvtPassCuts->Fill(4); // Not a fake vertex
+  hNEvtPassCuts->Fill(5); // Not a fake vertex
 
   if (fabs(MChargedHadronRAA->VZ_pf) >= 15.0) return false;
-  hNEvtPassCuts->Fill(5); // Vertex Z position within range
+  hNEvtPassCuts->Fill(6); // Vertex Z position within range
 
   if (MChargedHadronRAA->nTracksVtx < 0) return false;
-  hNEvtPassCuts->Fill(6); // Number of tracks in vertex
+  hNEvtPassCuts->Fill(7); // Number of tracks in vertex
 
   return true;
 }
@@ -117,13 +150,14 @@ public:
     hVZ = new TH1D(Form("hVZ%s", title.c_str()), "Vertex Z position", 100, -30.0, 30.0);
     hVZ_pf = new TH1D(Form("hVZ_pf%s", title.c_str()), "Vertex Z position (PF)", 100, -30.0, 30.0);
 
-    hNEvtPassCuts = new TH1D("hNEvtPassCuts", "Number of events passing cuts", 6, 0.5, 6.5);
+    hNEvtPassCuts = new TH1D("hNEvtPassCuts", "Number of events passing cuts", 7, 0.5, 7.5);
     hNEvtPassCuts->GetXaxis()->SetBinLabel(1, "Total Events");
     hNEvtPassCuts->GetXaxis()->SetBinLabel(2, "+ CC");
-    hNEvtPassCuts->GetXaxis()->SetBinLabel(3, "+ PV");
-    hNEvtPassCuts->GetXaxis()->SetBinLabel(4, "+ !isFakeVtx");
-    hNEvtPassCuts->GetXaxis()->SetBinLabel(5, "+ abs(VZ)<15");
-    hNEvtPassCuts->GetXaxis()->SetBinLabel(6, "+ nTrk>=0");
+    hNEvtPassCuts->GetXaxis()->SetBinLabel(3, "+ has a track pT > 3");
+    hNEvtPassCuts->GetXaxis()->SetBinLabel(4, "+ PV");
+    hNEvtPassCuts->GetXaxis()->SetBinLabel(5, "+ !isFakeVtx");
+    hNEvtPassCuts->GetXaxis()->SetBinLabel(6, "+ abs(VZ)<15");
+    hNEvtPassCuts->GetXaxis()->SetBinLabel(7, "+ nTrk>=0");
     hNEvtPassCuts->Sumw2();
 
     hNTrkPassCuts = new TH1D("hNTrkPassCuts", "Number of tracks passing cuts", 8, 0.5, 8.5);
