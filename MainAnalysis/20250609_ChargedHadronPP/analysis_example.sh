@@ -9,7 +9,7 @@ ISDATA=1
 SCALEFACTOR=1.0
 
 source clean.sh
-INPUT=$PATHSKIM/20250701_Skim_ppref2024_debug_noTrackEventSelection.root
+INPUT=$PATHSKIM/output_20250703_Skim_ppref2024_all/output_0.root
 
 OUTPUTANALYSIS=output/output.root
 ./ExecuteChargedHadronRAA \

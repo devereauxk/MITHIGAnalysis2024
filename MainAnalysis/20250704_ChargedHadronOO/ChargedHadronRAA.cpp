@@ -31,12 +31,17 @@ const Double_t pTBins_log[nPtBins_log + 1] = {
   0.5, 0.603, 0.728, 0.879, 1.062, 1.284, 1.553, 1.878, 2.272, 2.749, 3.327, 4.027, 4.872, 5.891, 7.117, 8.591, 10.36, 12.48, 15.03, 18.08, 21.73, 26.08, 31.28, 37.48, 44.89, 53.73, 64.31
 };
 
+const int nHFBins1 = 30;
+const int nHFBins2 = 70;
+const int nHFBins = nHFBins1 + nHFBins2;
+Double_t HFBins[nHFBins + 1];
+
 bool checkError(const Parameters &par) { return false; }
 
 //============================================================//
 // Check if event passes the selection criteria
 //============================================================//
-bool eventSelection(const ChargedHadronRAATreeMessenger *MChargedHadronRAA, TH1D* hNEvtPassCuts) {
+bool eventSelection(const ChargedHadronRAATreeMessenger *MChargedHadronRAA, Parameters &par, TH1D* hNEvtPassCuts) {
 
   hNEvtPassCuts->Fill(1); // Total events
 
@@ -59,8 +64,11 @@ bool eventSelection(const ChargedHadronRAATreeMessenger *MChargedHadronRAA, TH1D
   if (MChargedHadronRAA->nTracksVtx < 0) return false;
   hNEvtPassCuts->Fill(7); // Number of tracks in vertex
 
-  if (!checkHFORCondition(MChargedHadronRAA, 10, false)) return false;
+  if (par.OnlineHFAND > 0 && !checkHFANDCondition(MChargedHadronRAA, par.OnlineHFAND, par.OnlineHFAND, true)) return false;
   hNEvtPassCuts->Fill(8);
+
+  if (par.OfflineHFAND > 0 && !checkHFANDCondition(MChargedHadronRAA, par.OfflineHFAND, par.OfflineHFAND, false)) return false;
+  hNEvtPassCuts->Fill(9);
 
   return true;
 }
@@ -68,7 +76,7 @@ bool eventSelection(const ChargedHadronRAATreeMessenger *MChargedHadronRAA, TH1D
 //============================================================//
 // Check if track passes the selection criteria
 //============================================================//
-bool trackSelection(const ChargedHadronRAATreeMessenger *MChargedHadronRAA, unsigned long j, TH1D* hNTrkPassCuts, bool doEtaCut = true) {
+bool trackSelection(const ChargedHadronRAATreeMessenger *MChargedHadronRAA, unsigned long j, Parameters &par,TH1D* hNTrkPassCuts) {
 
   hNTrkPassCuts->Fill(1); // Total tracks considered
 
@@ -81,26 +89,21 @@ bool trackSelection(const ChargedHadronRAATreeMessenger *MChargedHadronRAA, unsi
   if (MChargedHadronRAA->highPurity->at(j) == false) return false;
   hNTrkPassCuts->Fill(4); // High purity
 
-  if (fabs(MChargedHadronRAA->trkEta->at(j)) > 1) {
-    hNTrkPassCuts->Fill(5); // Eta < 1, changed from 2.4
-    if (doEtaCut) return false;
-  }
-
-  if (MChargedHadronRAA->trkPt->at(j) < 0.1) return false; // vipuls
-  hNTrkPassCuts->Fill(6); // pT > 0.1 GeV/c
+  if (MChargedHadronRAA->trkPt->at(j) < par.MinTrackPt) return false; // changed from vipuls
+  hNTrkPassCuts->Fill(5); // pT > 0.1 GeV/c
 
   double RelativeUncertainty = MChargedHadronRAA->trkPtError->at(j) / MChargedHadronRAA->trkPt->at(j);
   if (MChargedHadronRAA->trkPt->at(j) > 10 && RelativeUncertainty > 0.1) return false;
-  hNTrkPassCuts->Fill(7); // Relative uncertainty < 10%
+  hNTrkPassCuts->Fill(6); // Relative uncertainty < 10%
 
   if (fabs(MChargedHadronRAA->trkDxyAssociatedVtx->at(j)) / MChargedHadronRAA->trkDxyErrAssociatedVtx->at(j) > 3) return false;
-  hNTrkPassCuts->Fill(8); // Dxy < 3 sigma
+  hNTrkPassCuts->Fill(7); // Dxy < 3 sigma
 
   if(fabs(MChargedHadronRAA->trkDzAssociatedVtx->at(j)) / MChargedHadronRAA->trkDzErrAssociatedVtx->at(j) > 3) return false;
-  hNTrkPassCuts->Fill(9); // Dz < 3 sigma
+  hNTrkPassCuts->Fill(8); // Dz < 3 sigma
 
-  if (MChargedHadronRAA->trkPt->at(j) > 500) return false;
-  hNTrkPassCuts->Fill(10); // pT < 500 GeV/c
+  if (MChargedHadronRAA->trkPt->at(j) > par.MaxTrackPt) return false;
+  hNTrkPassCuts->Fill(9); // pT < 500 GeV/c
 
   return true;
 }
@@ -112,9 +115,8 @@ bool trackSelection(const ChargedHadronRAATreeMessenger *MChargedHadronRAA, unsi
 class DataAnalyzer {
 public:
   TFile *inf, *outf;
-  TH1D *hTrkPt, *hTrkEta, *hZDCPlus, *hZDCMinus, 
-        *hZDCPlus_noEvtSel, *hZDCMinus_noEvtSel;
-  TH2D *hTrkPtEta;
+  TH1D *hTrkPt, *hTrkEta, *hMult, *hhiHF_pf;
+  TH2D *hTrkPtEta, *hHFEMaxPlusMinus, *hhiHFPlusMinus_pf, *hZDCPlusMinus;
   TH1D *hNEvtPassCuts, *hNTrkPassCuts;
   TH3D *hVXYZ;
   TH1D *hVZ_pf;
@@ -138,27 +140,38 @@ public:
   void analyze(Parameters &par) {
     outf->cd();
 
-    hTrkPt = new TH1D(Form("hTrkPt%s", title.c_str()), "", nPtBins_log, pTBins_log);
-    hTrkPt->Sumw2();
-    hTrkEta = new TH1D(Form("hTrkEta%s", title.c_str()), "", 50, -3.0, 3.0);
-    hTrkEta->Sumw2();
-    hTrkPtEta = new TH2D(Form("hTrkPtEta%s", title.c_str()), "", nPtBins, pTBins_fine, 50, -4.0, 4.0);
-    hTrkPtEta->Sumw2();
-    hZDCPlus = new TH1D(Form("hZDCPlus%s", title.c_str()), "ZDC Plus Energy", 50, 0.0, 10000);
-    hZDCPlus->Sumw2();
-    hZDCPlus_noEvtSel = new TH1D(Form("hZDCPlus_noEvtSel%s", title.c_str()), "ZDC Plus Energy (no event selection)", 50, 0.0, 10000);
-    hZDCPlus_noEvtSel->Sumw2();
-    hZDCMinus = new TH1D(Form("hZDCMinus%s", title.c_str()), "ZDC Minus Energy", 50, 0.0, 10000);
-    hZDCMinus->Sumw2();
-    hZDCMinus_noEvtSel = new TH1D(Form("hZDCMinus_noEvtSel%s", title.c_str()), "ZDC Minus Energy (no event selection)", 50, 0.0, 10000);
-    hZDCMinus_noEvtSel->Sumw2();
+    // Fill first 30 bins: linearly spaced between 0 and 15
+    for (int i = 0; i <= nHFBins1; ++i) {
+      HFBins[i] = 0.0 + (15.0 - 0.0) * i / nHFBins1;
+    }
+    // Fill next 70 bins: linearly spaced between 15 and 600
+    for (int i = 1; i <= nHFBins2; ++i) {
+      HFBins[nHFBins1 + i] = 15.0 + (600.0 - 15.0) * i / nHFBins2;
+    }
 
+    hTrkPt = new TH1D(Form("hTrkPt%s", title.c_str()), "", nPtBins_log, pTBins_log);
+    hTrkEta = new TH1D(Form("hTrkEta%s", title.c_str()), "", 50, -3.0, 3.0);
+    hMult = new TH1D(Form("hMult%s", title.c_str()), "Multiplicity", 100, 0.0, 1000);
+    hhiHF_pf = new TH1D(Form("hhiHF_pf%s", title.c_str()), "HF ET Sum", 100, 0.0, 2000);
+    hTrkPtEta = new TH2D(Form("hTrkPtEta%s", title.c_str()), "", nPtBins, pTBins_fine, 50, -4.0, 4.0);
+    hHFEMaxPlusMinus = new TH2D(Form("hHFEMaxPlusMinus%s", title.c_str()), "HF E Max Plus, Minus", nHFBins, HFBins, nHFBins, HFBins);
+    hhiHFPlusMinus_pf = new TH2D(Form("hhiHFPlusMinus_pf%s", title.c_str()), "HF ET Sum Plus, Minus", 100, 0, 400, 100, 0, 400);
+    hZDCPlusMinus = new TH2D(Form("hZDCPlusMinus%s", title.c_str()), "ZDC Plus, Minus Energy", 100, 0.0, 10000, 100, 0.0, 10000);
     hVXYZ = new TH3D(Form("hVXYZ%s", title.c_str()), "Vertex XYZ position", 100, -30.0, 30.0, 100, -30.0, 30.0, 100, -30.0, 30.0);
-    hVXYZ->Sumw2();
     hVZ_pf = new TH1D(Form("hVZ_pf%s", title.c_str()), "Vertex Z position (PF)", 100, -30.0, 30.0);
+
+    hTrkPt->Sumw2();
+    hTrkEta->Sumw2();
+    hTrkPtEta->Sumw2();
+    hMult->Sumw2();
+    hhiHF_pf->Sumw2();
+    hHFEMaxPlusMinus->Sumw2();
+    hhiHFPlusMinus_pf->Sumw2();
+    hZDCPlusMinus->Sumw2();
+    hVXYZ->Sumw2();
     hVZ_pf->Sumw2();
 
-    hNEvtPassCuts = new TH1D("hNEvtPassCuts", "Number of events passing cuts", 8, 0.5, 8.5);
+    hNEvtPassCuts = new TH1D("hNEvtPassCuts", "Number of events passing cuts", 9, 0.5, 9.5);
     hNEvtPassCuts->GetXaxis()->SetBinLabel(1, "Total Events");
     hNEvtPassCuts->GetXaxis()->SetBinLabel(2, "+ HLT_OxyZeroBias_v1");
     hNEvtPassCuts->GetXaxis()->SetBinLabel(3, "+ CC");
@@ -166,20 +179,20 @@ public:
     hNEvtPassCuts->GetXaxis()->SetBinLabel(5, "+ !isFakeVtx");
     hNEvtPassCuts->GetXaxis()->SetBinLabel(6, "+ abs(VZ)<15");
     hNEvtPassCuts->GetXaxis()->SetBinLabel(7, "+ nTrk>=0");
-    hNEvtPassCuts->GetXaxis()->SetBinLabel(8, "+ HF 10 OR Offline");
+    hNEvtPassCuts->GetXaxis()->SetBinLabel(8, "+ Online HF AND 14");
+    hNEvtPassCuts->GetXaxis()->SetBinLabel(9, "+ Offline HF AND 12");
     hNEvtPassCuts->Sumw2();
 
-    hNTrkPassCuts = new TH1D("hNTrkPassCuts", "Number of tracks passing cuts", 10, 0.5, 10.5);
+    hNTrkPassCuts = new TH1D("hNTrkPassCuts", "Number of tracks passing cuts", 9, 0.5, 9.5);
     hNTrkPassCuts->GetXaxis()->SetBinLabel(1, "Total Tracks");
     hNTrkPassCuts->GetXaxis()->SetBinLabel(2, "+ nTrk > 0");
     hNTrkPassCuts->GetXaxis()->SetBinLabel(3, "+ abs(charge)=1");
     hNTrkPassCuts->GetXaxis()->SetBinLabel(4, "+ High Purity");
-    hNTrkPassCuts->GetXaxis()->SetBinLabel(5, "+ Eta < 1");
-    hNTrkPassCuts->GetXaxis()->SetBinLabel(6, "+ pT > 0.1 GeV/c");
-    hNTrkPassCuts->GetXaxis()->SetBinLabel(7, "+ pT > 10 && Rel pT Error < 10%");
-    hNTrkPassCuts->GetXaxis()->SetBinLabel(8, "+ Dxy < 3 sigma");
-    hNTrkPassCuts->GetXaxis()->SetBinLabel(9, "+ Dz < 3 sigma");
-    hNTrkPassCuts->GetXaxis()->SetBinLabel(10, "+ pT < 500 GeV/c");
+    hNTrkPassCuts->GetXaxis()->SetBinLabel(5, "+ pT > 0.1 GeV/c");
+    hNTrkPassCuts->GetXaxis()->SetBinLabel(6, "+ pT > 10 && Rel pT Error < 10%");
+    hNTrkPassCuts->GetXaxis()->SetBinLabel(7, "+ Dxy < 3 sigma");
+    hNTrkPassCuts->GetXaxis()->SetBinLabel(8, "+ Dz < 3 sigma");
+    hNTrkPassCuts->GetXaxis()->SetBinLabel(9, "+ pT < 500 GeV/c");
     hNTrkPassCuts->Sumw2();
 
     par.printParameters();
@@ -202,19 +215,17 @@ public:
         eventWeight *= MChargedHadronRAA->eventWeight;
       }
 
-      // fill hists with no event selection
-      hZDCPlus_noEvtSel->Fill(MChargedHadronRAA->ZDCsumPlus, eventWeight);
-      hZDCMinus_noEvtSel->Fill(MChargedHadronRAA->ZDCsumMinus, eventWeight);
-
       // event selection criteria
-      if (!eventSelection(MChargedHadronRAA, hNEvtPassCuts)) {
+      if (par.ApplyEventSelection && !eventSelection(MChargedHadronRAA, par,hNEvtPassCuts)) {
         eventsRejected++;
         continue;
       }
 
       // event-level histograms
-      hZDCPlus->Fill(MChargedHadronRAA->ZDCsumPlus, eventWeight);
-      hZDCMinus->Fill(MChargedHadronRAA->ZDCsumMinus, eventWeight);
+      hhiHF_pf->Fill(MChargedHadronRAA->hiHF_pf, eventWeight);
+      hHFEMaxPlusMinus->Fill(MChargedHadronRAA->HFEMaxPlus, MChargedHadronRAA->HFEMaxMinus, eventWeight);
+      hhiHFPlusMinus_pf->Fill(MChargedHadronRAA->hiHFPlus_pf, MChargedHadronRAA->hiHFMinus_pf, eventWeight);
+      if (par.IsData) hZDCPlusMinus->Fill(MChargedHadronRAA->ZDCsumPlus, MChargedHadronRAA->ZDCsumMinus, eventWeight); // no ZDC in MC
       hVXYZ->Fill(MChargedHadronRAA->VX, MChargedHadronRAA->VY, MChargedHadronRAA->VZ, eventWeight);
       hVZ_pf->Fill(MChargedHadronRAA->VZ_pf, eventWeight);
 
@@ -229,11 +240,14 @@ public:
         float eventTrkWeight = eventWeight * trkWeight;
 
         // track selection w/o eta cut
-        if (!trackSelection(MChargedHadronRAA, j, hNTrkPassCuts)) continue;
+        if (!trackSelection(MChargedHadronRAA, j, par, hNTrkPassCuts)) continue;
 
         // eta hist before applying eta cut
         hTrkEta->Fill(MChargedHadronRAA->trkEta->at(j), eventTrkWeight);
         hTrkPtEta->Fill(MChargedHadronRAA->trkPt->at(j), MChargedHadronRAA->trkEta->at(j), eventTrkWeight);
+
+        // count mult before eta cut, standard for multiplicity
+        hMult->Fill(MChargedHadronRAA->multiplicityEta2p4, eventTrkWeight);
 
         // apply eta cut (last track selection)
         if (fabs(MChargedHadronRAA->trkEta->at(j)) > 1.0) continue;
@@ -254,31 +268,33 @@ public:
   void writeHistograms(TFile *outf) {
     outf->cd();
     smartWrite(hTrkPt);
-    smartWrite(hTrkPtEta);
     smartWrite(hTrkEta);
-    smartWrite(hZDCPlus);
-    smartWrite(hZDCMinus);
-    smartWrite(hZDCPlus_noEvtSel);
-    smartWrite(hZDCMinus_noEvtSel);
-    smartWrite(hNEvtPassCuts);
-    smartWrite(hNTrkPassCuts);
+    smartWrite(hMult);
+    smartWrite(hhiHF_pf);
+    smartWrite(hTrkPtEta);
+    smartWrite(hHFEMaxPlusMinus);
+    smartWrite(hhiHFPlusMinus_pf);
+    smartWrite(hZDCPlusMinus);
     smartWrite(hVXYZ);
     smartWrite(hVZ_pf);
+    smartWrite(hNEvtPassCuts);
+    smartWrite(hNTrkPassCuts);
   }
 
 private:
   void deleteHistograms() {
     delete hTrkPt;
-    delete hTrkPtEta;
     delete hTrkEta;
-    delete hZDCPlus;
-    delete hZDCMinus;
-    delete hZDCPlus_noEvtSel;
-    delete hZDCMinus_noEvtSel;
-    delete hNEvtPassCuts;
-    delete hNTrkPassCuts;
+    delete hMult;
+    delete hhiHF_pf;
+    delete hTrkPtEta;
+    delete hHFEMaxPlusMinus;
+    delete hhiHFPlusMinus_pf;
+    delete hZDCPlusMinus;
     delete hVXYZ;
     delete hVZ_pf;
+    delete hNEvtPassCuts;
+    delete hNTrkPassCuts;
   }
 };
 
@@ -302,6 +318,9 @@ int main(int argc, char *argv[]) {
   par.MaxTrackPt      = CL.GetDouble("MaxTrackPt", 500.0);    // Maximum track transverse momentum threshold for track selection.
   par.UseTrackWeight  = CL.GetBool("UseTrackWeight", true);
   par.UseEventWeight  = CL.GetBool("UseEventWeight", true);
+  par.ApplyEventSelection = CL.GetBool("ApplyEventSelection", true);
+  par.OnlineHFAND     = CL.GetDouble("OnlineHFAND", -1);    // Online HF AND condition, -1 cut not applied
+  par.OfflineHFAND    = CL.GetDouble("OfflineHFAND", -1);    // Offline HF AND condition, -1 cut not applied
 
   if (checkError(par))
     return -1;

@@ -58,7 +58,7 @@ void LabelBinContent(TH1* hist) {
   }
 }
 
-void plotFancy() {
+void plotFancy_MCDataComparison() {
   // Make output directory and simple hists for examples
   system("mkdir -p ./plots");
 
@@ -72,55 +72,77 @@ void plotFancy() {
   TH2D *hZDCPlusMinus = (TH2D*)fin->Get("hZDCPlusMinus");
   TH1D *hZDCPlus = (TH1D*)hZDCPlusMinus->ProjectionX("hZDCPlus");
   TH1D *hZDCMinus = (TH1D*)hZDCPlusMinus->ProjectionY("hZDCMinus");
+
+  float MC_scale = 33549./978697; // Scale factor for MC histograms
+
+  // Scale all MC histograms by MC_scale
+  // (Do this immediately after loading them)
+  TH1D *hTrkPt_MC = (TH1D*)fin_mc->Get("hTrkPt");
+  if (hTrkPt_MC) hTrkPt_MC->Scale(MC_scale);
+
+  TH1D *hNEvtPassCuts_MC = (TH1D*)fin_mc->Get("hNEvtPassCuts");
+  if (hNEvtPassCuts_MC) hNEvtPassCuts_MC->Scale(MC_scale);
+
+  TH1D *hTrkEta_MC = (TH1D*)fin_mc->Get("hTrkEta");
+  if (hTrkEta_MC) hTrkEta_MC->Scale(MC_scale);
+
+  TH2D *hZDCPlusMinus_MC = (TH2D*)fin_mc->Get("hZDCPlusMinus");
+  if (hZDCPlusMinus_MC) hZDCPlusMinus_MC->Scale(MC_scale);
+
+  TH1D *hMult_MC = (TH1D*)fin_mc->Get("hMult");
+  if (hMult_MC) hMult_MC->Scale(MC_scale);
   
   // ===========================================================================
   // EXAMPLE 1: Styling a Single Canvas ----------------------------------------
   TCanvas* ex1Canvas = new TCanvas("ex1Canvas", "", 800, 600);
-  
+
   // Get the canvas pad to pass to other functions
   TPad* ex1Pad = (TPad*) ex1Canvas->GetPad(0);
   ex1Pad->cd();
   ex1Pad->SetLogy();
-  
+
   // >>> Apply the CMS TDR style <<<
   SetTDRStyle();
-  
+
+  divideByWidth(hTrkPt);
+  divideByWidth(hTrkPt_MC);
+
   // Draw the TH1 as normal.
   hTrkPt->GetXaxis()->SetTitle("p_{T} [GeV/c]");
   hTrkPt->GetYaxis()->SetTitle("dN/dp_{T}");
   hTrkPt->GetXaxis()->SetRangeUser(0.5, 25);
   hTrkPt->GetYaxis()->SetRangeUser(1, 2e7);
 
-  divideByWidth(hTrkPt);
-
-  hTrkPt->SetMarkerColor(cmsBlue);      // You can easily use official CMS colors
-  hTrkPt->SetMarkerStyle(mCircleFill);  // And easily choose markers
+  hTrkPt->SetMarkerColor(cmsBlue);
+  hTrkPt->SetMarkerStyle(mCircleFill);
   hTrkPt->SetLineColor(cmsRed);
   hTrkPt->SetLineWidth(3);
   hTrkPt->Draw();
 
-  /*
-  AddPlotLabel(
-    ex1Pad,      // Provide the TPad
-    "-1 < #eta < 1" , // (optional) Add a label to the plot
-    0.04,        // (optional) Set the text size
-    0.02,        // (optional) Set the text offset
-    0.75,        // (optional) Set the X position of the label (move right)
-    0.85         // (optional) Set the Y position of the label (top)
-  );
-  */
-  
-  // >>> Add the CMS header
+  // MC styling
+  hTrkPt_MC->SetLineColor(kOrange+1);
+  hTrkPt_MC->SetLineStyle(2);
+  hTrkPt_MC->SetLineWidth(2);
+  hTrkPt_MC->Draw("HIST SAME");
+
+  TLegend* leg1 = new TLegend(0.55, 0.70, 0.85, 0.82);
+  leg1->SetBorderSize(0);
+  leg1->SetFillStyle(0);
+  leg1->SetTextFont(42);
+  leg1->SetTextSize(0.035);
+  leg1->AddEntry(hTrkPt, "OO data Run 394153", "pl");
+  leg1->AddEntry(hTrkPt_MC, "OO HIJING MC", "l");
+  leg1->Draw();
+
   AddCMSHeader(
-    ex1Pad,      // Provide the TPad
-    "Internal", // (optional) Add a subheader to the CMS header
+    ex1Pad,
+    "Internal",
     false
   );
   AddUPCHeader(ex1Pad, "9.6 TeV", "Run 393953 OO");
   ex1Pad->Update();
-  
-  // That's it!
-  ex1Canvas->SaveAs("plots/fancy_pT.pdf");
+
+  ex1Canvas->SaveAs("plots/fancy_comp_pT.pdf");
 
 
   // ===========================================================================
@@ -129,26 +151,38 @@ void plotFancy() {
   TPad* ex2Pad = (TPad*) ex2Canvas->GetPad(0);
   ex2Pad->cd();
 
-  //LabelBinContent(hNEvtPassCuts);
-
   SetTDRStyle();
 
   hNEvtPassCuts->GetYaxis()->SetTitle("Counts");
   hNEvtPassCuts->GetYaxis()->SetRangeUser(0, 1.5e6);
   hNEvtPassCuts->SetLineColor(cmsRed);
   hNEvtPassCuts->SetLineWidth(3);
-  hNEvtPassCuts->Draw("SAME TEXT0");
+  hNEvtPassCuts->Draw();
+
+  // MC styling
+  hNEvtPassCuts_MC->SetLineColor(kOrange+1);
+  hNEvtPassCuts_MC->SetLineStyle(2);
+  hNEvtPassCuts_MC->SetLineWidth(2);
+  hNEvtPassCuts_MC->Draw("HIST SAME");
+
+  TLegend* leg2 = new TLegend(0.55, 0.70, 0.85, 0.82);
+  leg2->SetBorderSize(0);
+  leg2->SetFillStyle(0);
+  leg2->SetTextFont(42);
+  leg2->SetTextSize(0.035);
+  leg2->AddEntry(hNEvtPassCuts, "OO data Run 394153", "l");
+  leg2->AddEntry(hNEvtPassCuts_MC, "OO HIJING MC", "l");
+  leg2->Draw();
 
   AddCMSHeader(
-    ex2Pad,      // Provide the TPad
-    "Internal", // (optional) Add a subheader to the CMS header
+    ex2Pad,
+    "Internal",
     true
   );
   AddUPCHeader(ex2Pad, "9.6 TeV", "Run 393953 OO");
   ex2Pad->Update();
 
-  // That's it!
-  ex2Canvas->SaveAs("plots/fancy_NEvtPass.pdf");
+  ex2Canvas->SaveAs("plots/fancy_comp_NEvtPass.pdf");
 
   // ===========================================================================
   TCanvas* ex3Canvas = new TCanvas("ex3Canvas", "", 800, 600);
@@ -157,77 +191,44 @@ void plotFancy() {
 
   SetTDRStyle();
 
-  // Draw the TH1 as normal.
+  divideByWidth(hTrkEta);
+  divideByWidth(hTrkEta_MC);
+
   hTrkEta->GetXaxis()->SetTitle("#eta");
   hTrkEta->GetYaxis()->SetTitle("dN/d#eta");
   hTrkEta->GetXaxis()->SetRangeUser(-2.4, 2.4);
-  //hTrkEta->GetYaxis()->SetRangeUser(1, 2e7);
+  hTrkEta->GetYaxis()->SetRangeUser(400e3, 1600e3);
 
-  divideByWidth(hTrkEta);
-
-  hTrkEta->SetMarkerColor(cmsRed);      // You can easily use official CMS colors
-  hTrkEta->SetMarkerStyle(mCircleFill);  // And easily choose markers
+  hTrkEta->SetMarkerColor(cmsRed);
+  hTrkEta->SetMarkerStyle(mCircleFill);
   hTrkEta->SetLineColor(cmsBlue);
   hTrkEta->SetLineWidth(3);
   hTrkEta->Draw();
 
+  // MC styling
+  hTrkEta_MC->SetLineColor(kOrange+1);
+  hTrkEta_MC->SetLineStyle(2);
+  hTrkEta_MC->SetLineWidth(2);
+  hTrkEta_MC->Draw("HIST SAME");
+
+  TLegend* leg3 = new TLegend(0.55, 0.70, 0.85, 0.82);
+  leg3->SetBorderSize(0);
+  leg3->SetFillStyle(0);
+  leg3->SetTextFont(42);
+  leg3->SetTextSize(0.035);
+  leg3->AddEntry(hTrkEta, "OO data Run 394153", "pl");
+  leg3->AddEntry(hTrkEta_MC, "OO HIJING MC", "l");
+  leg3->Draw();
+
   AddCMSHeader(
-    ex3Pad,      // Provide the TPad
-    "Internal", // (optional) Add a subheader to the CMS header
+    ex3Pad,
+    "Internal",
     true
   );
   AddUPCHeader(ex3Pad, "9.6 TeV", "Run 393953 OO");
   ex3Pad->Update();
 
-  // That's it!
-  ex3Canvas->SaveAs("plots/fancy_eta.pdf");
-
-
-  // ===========================================================================
-  TCanvas* ex4Canvas = new TCanvas("ex4Canvas", "", 800, 600);
-  TPad* ex4Pad = (TPad*) ex4Canvas->GetPad(0);
-  ex4Pad->cd(); 
-  ex4Pad->SetLogy();
-
-  SetTDRStyle();
-
-  // Draw the TH1 as normal.
-  hZDCMinus->GetXaxis()->SetTitle("ZDC Minus Energy [GeV]");
-  hZDCMinus->GetYaxis()->SetTitle("Counts");
-  hZDCMinus->GetXaxis()->SetRangeUser(0, 10000);
-  hZDCMinus->GetYaxis()->SetRangeUser(5e1, 5e4);
-  hZDCMinus->SetLineColor(cmsBlue);
-  hZDCMinus->SetLineWidth(2);
-  hZDCMinus->Draw("HIST");
-
-  hZDCPlus->GetXaxis()->SetTitle("ZDC Plus Energy [GeV]");
-  hZDCPlus->GetYaxis()->SetTitle("Counts");
-  hZDCPlus->GetXaxis()->SetRangeUser(0, 10000);
-  hZDCPlus->GetYaxis()->SetRangeUser(5e1, 5e4);
-  hZDCPlus->SetLineColor(cmsRed);
-  hZDCPlus->SetLineWidth(2);
-  hZDCPlus->Draw("HIST SAME");
-
-  
-  TLegend* leg = new TLegend(0.45, 0.60, 0.68, 0.72);
-  leg->SetBorderSize(0);
-  leg->SetFillStyle(0);
-  leg->SetTextFont(42);
-  leg->SetTextSize(0.035);
-  leg->AddEntry(hZDCMinus, "ZDC Minus", "l");
-  leg->AddEntry(hZDCPlus, "ZDC Plus", "l");
-  
-  leg->Draw();
-
-  AddCMSHeader(
-    ex4Pad,      // Provide the TPad
-    "Internal" // (optional) Add a subheader to the CMS header
-  );
-  AddUPCHeader(ex4Pad, "9.6 TeV", "Run 393953 OO");
-  ex4Pad->Update();
-
-  // That's it!
-  ex4Canvas->SaveAs("plots/fancy_ZDC.pdf");
+  ex3Canvas->SaveAs("plots/fancy_comp_eta.pdf");
 
   // ===========================================================================
   // Plot multiplicity distribution (assuming hMult exists in your ROOT file)
@@ -242,13 +243,28 @@ void plotFancy() {
 
   hMult->GetXaxis()->SetTitle("Track Multiplicity");
   hMult->GetYaxis()->SetTitle("Counts");
-  hMult->GetXaxis()->SetRangeUser(0, 350);
+  hMult->GetXaxis()->SetRangeUser(0, 700);
   hMult->GetYaxis()->SetRangeUser(1e1, 8e4);
-  hMult->SetMarkerColor(cmsRed);      // You can easily use official CMS colors
-  hMult->SetMarkerStyle(mCircleFill);  // And easily choose markers
+  hMult->SetMarkerColor(cmsRed);
+  hMult->SetMarkerStyle(mCircleFill);
   hMult->SetLineColor(cmsBlue);
   hMult->SetLineWidth(3);
   hMult->Draw();
+
+  // MC styling
+  hMult_MC->SetLineColor(kOrange+1);
+  hMult_MC->SetLineStyle(2);
+  hMult_MC->SetLineWidth(2);
+  hMult_MC->Draw("HIST SAME");
+
+  TLegend* leg5 = new TLegend(0.55, 0.70, 0.85, 0.82);
+  leg5->SetBorderSize(0);
+  leg5->SetFillStyle(0);
+  leg5->SetTextFont(42);
+  leg5->SetTextSize(0.035);
+  leg5->AddEntry(hMult, "OO data Run 394153", "pl");
+  leg5->AddEntry(hMult_MC, "OO HIJING MC", "l");
+  leg5->Draw();
 
   AddCMSHeader(
     ex5Pad,
@@ -258,6 +274,6 @@ void plotFancy() {
   AddUPCHeader(ex5Pad, "9.6 TeV", "Run 393953 OO");
   ex5Pad->Update();
 
-  ex5Canvas->SaveAs("plots/fancy_multiplicity.pdf");
+  ex5Canvas->SaveAs("plots/fancy_comp_multiplicity.pdf");
 
 }

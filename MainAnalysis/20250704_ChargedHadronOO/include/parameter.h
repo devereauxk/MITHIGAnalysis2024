@@ -23,6 +23,9 @@ public:
   float scaleFactor; // Scale factor
   bool UseTrackWeight; // Use track weight
   bool UseEventWeight; // Use event weight
+  bool ApplyEventSelection; // Apply event selection criteria
+  float OnlineHFAND; // Online HF AND condition
+  float OfflineHFAND;  // Offline HF AND condition
   void printParameters() const {
 
     cout << "Input file: " << input << endl;
@@ -35,6 +38,9 @@ public:
     cout << "Scale factor: " << scaleFactor << endl;
     cout << "UseTrackWeight: " << UseTrackWeight << endl;
     cout << "UseEventWeight: " << UseEventWeight << endl;
+    cout << "ApplyEventSelection: " << ApplyEventSelection << endl;
+    cout << "OnlineHFAND: " << OnlineHFAND << endl;
+    cout << "OfflineHFAND: " << OfflineHFAND << endl;
   }
 };
 
