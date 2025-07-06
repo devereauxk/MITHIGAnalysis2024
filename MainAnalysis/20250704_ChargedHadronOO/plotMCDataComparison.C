@@ -282,15 +282,15 @@ void plotSimple(vector<TH1*> hists, const char* title, vector<string> labels,
     leg->Draw("SAME");
 }
 
-void plotMCDataComparison(const char* output = "plots/394153") {
+void plotMCDataComparison(const char* output = "plots/394153_min04_HFAND14_HFAND12") {
 
     vector<string> labels = {"OO Run 394153", "OO HIJING"};
     vector<string> inputFiles = {
-        "output/20250705_OO_394153_FIRSTLOOK_only25_eventSel.root",
-        "output/skim_HiForest_250520_Hijing_MinimumBias_b015_OO_5362GeV_250518_eventSel.root"
+        "output/20250705_OO_394153_FIRSTLOOK_only25_eventSel_min04_HFAND14_HFAND12.root",
+        "output/skim_HiForest_250520_Hijing_MinimumBias_b015_OO_5362GeV_250518_eventSel_min04_HFAND14_HFAND12.root"
     };
 
-    float MC_scale = 33549./978697;
+    float MC_scale = 30887./892630;
 
     vector<TH1*> hNEvtPassCuts, hNTrkPassCuts, hTrkPt, hTrkEta, hMult, hhiHF_pf, hVZ_pf;
     vector<TH2*> hTrkPtEta, hHFEMaxPlusMinus, hhiHFPlusMinus_pf, hZDCPlusMinus;
@@ -474,16 +474,16 @@ void plotMCDataComparison(const char* output = "plots/394153") {
     c2->cd(5);
     plotSimple(
         hHFEMaxMinus, "hHFEMaxMinus", labels,
-        "HF EMax Minus [GeV]", -1, -1,
-        "Counts", 1, 2e4,
+        "HF EMax Minus [GeV]", 0, 400,
+        "Counts", 1, 1e3,
         false, true
     );
 
     c2->cd(6);
     plotSimple(
         hHFEMaxPlus, "hHFEMaxPlus", labels,
-        "HF EMax Plus [GeV]", -1, -1,
-        "Counts", 1, 2e4,
+        "HF EMax Plus [GeV]", 0, 400,
+        "Counts", 1, 1e3,
         false, true
     );
 
@@ -522,7 +522,7 @@ void plotMCDataComparison(const char* output = "plots/394153") {
     c2->cd(11);
     plotSimple(
         hhiHF_pf, "hhiHF_pf", labels,
-        "HF ET Sum [GeV]", -1, -1,
+        "HF ET Sum [GeV]", 0, 800,
         "Counts", 1, 2e4,
         false, true
     );

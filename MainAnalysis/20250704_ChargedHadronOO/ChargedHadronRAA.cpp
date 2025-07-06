@@ -45,7 +45,7 @@ bool eventSelection(const ChargedHadronRAATreeMessenger *MChargedHadronRAA, Para
 
   hNEvtPassCuts->Fill(1); // Total events
 
-  if (!MChargedHadronRAA->HLT_OxyZeroBias_v1) return false;
+  if (par.IsData && !MChargedHadronRAA->HLT_OxyZeroBias_v1) return false;
   hNEvtPassCuts->Fill(2); // HLT trigger
 
   if (MChargedHadronRAA->ClusterCompatibilityFilter == false) return false;
@@ -188,7 +188,7 @@ public:
     hNTrkPassCuts->GetXaxis()->SetBinLabel(2, "+ nTrk > 0");
     hNTrkPassCuts->GetXaxis()->SetBinLabel(3, "+ abs(charge)=1");
     hNTrkPassCuts->GetXaxis()->SetBinLabel(4, "+ High Purity");
-    hNTrkPassCuts->GetXaxis()->SetBinLabel(5, "+ pT > 0.1 GeV/c");
+    hNTrkPassCuts->GetXaxis()->SetBinLabel(5, "+ pT > 0. GeV/c");
     hNTrkPassCuts->GetXaxis()->SetBinLabel(6, "+ pT > 10 && Rel pT Error < 10%");
     hNTrkPassCuts->GetXaxis()->SetBinLabel(7, "+ Dxy < 3 sigma");
     hNTrkPassCuts->GetXaxis()->SetBinLabel(8, "+ Dz < 3 sigma");
@@ -222,6 +222,7 @@ public:
       }
 
       // event-level histograms
+      hMult->Fill(MChargedHadronRAA->multipicityEta2p4, eventWeight);
       hhiHF_pf->Fill(MChargedHadronRAA->hiHF_pf, eventWeight);
       hHFEMaxPlusMinus->Fill(MChargedHadronRAA->HFEMaxPlus, MChargedHadronRAA->HFEMaxMinus, eventWeight);
       hhiHFPlusMinus_pf->Fill(MChargedHadronRAA->hiHFPlus_pf, MChargedHadronRAA->hiHFMinus_pf, eventWeight);
@@ -245,9 +246,6 @@ public:
         // eta hist before applying eta cut
         hTrkEta->Fill(MChargedHadronRAA->trkEta->at(j), eventTrkWeight);
         hTrkPtEta->Fill(MChargedHadronRAA->trkPt->at(j), MChargedHadronRAA->trkEta->at(j), eventTrkWeight);
-
-        // count mult before eta cut, standard for multiplicity
-        hMult->Fill(MChargedHadronRAA->multiplicityEta2p4, eventTrkWeight);
 
         // apply eta cut (last track selection)
         if (fabs(MChargedHadronRAA->trkEta->at(j)) > 1.0) continue;

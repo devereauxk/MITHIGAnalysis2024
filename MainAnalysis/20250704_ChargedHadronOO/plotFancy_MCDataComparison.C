@@ -62,8 +62,10 @@ void plotFancy_MCDataComparison() {
   // Make output directory and simple hists for examples
   system("mkdir -p ./plots");
 
-  TFile* fin = TFile::Open("output/20250705_OO_394153_FIRSTLOOK_only25_eventSel.root", "READ");
-  TFile* fin_mc = TFile::Open("output/skim_HiForest_250520_Hijing_MinimumBias_b015_OO_5362GeV_250518_eventSel.root", "READ");
+  TFile* fin = TFile::Open("output/20250705_OO_394153_FIRSTLOOK_only25_eventSel_min04_HFAND14_HFAND12.root", "READ");
+  TFile* fin_mc = TFile::Open("output/skim_HiForest_250520_Hijing_MinimumBias_b015_OO_5362GeV_250518_eventSel_min04_HFAND14_HFAND12.root", "READ");
+
+  string output_prefix = "plots/fancy_min04_HFAND14_HFAND12";
 
   TH1D *hTrkPt = (TH1D*)fin->Get("hTrkPt");
   TH1D *hNEvtPassCuts = (TH1D*)fin->Get("hNEvtPassCuts");
@@ -73,18 +75,18 @@ void plotFancy_MCDataComparison() {
   TH1D *hZDCPlus = (TH1D*)hZDCPlusMinus->ProjectionX("hZDCPlus");
   TH1D *hZDCMinus = (TH1D*)hZDCPlusMinus->ProjectionY("hZDCMinus");
 
-  float MC_scale = 33549./978697; // Scale factor for MC histograms
+  float MC_scale = 30887./892630; // Scale factor for MC histograms
 
   // Scale all MC histograms by MC_scale
   // (Do this immediately after loading them)
+  // all except, N pass evt cuts
   TH1D *hTrkPt_MC = (TH1D*)fin_mc->Get("hTrkPt");
   if (hTrkPt_MC) hTrkPt_MC->Scale(MC_scale);
 
-  TH1D *hNEvtPassCuts_MC = (TH1D*)fin_mc->Get("hNEvtPassCuts");
-  if (hNEvtPassCuts_MC) hNEvtPassCuts_MC->Scale(MC_scale);
-
   TH1D *hTrkEta_MC = (TH1D*)fin_mc->Get("hTrkEta");
   if (hTrkEta_MC) hTrkEta_MC->Scale(MC_scale);
+
+  TH1D *hNEvtPassCuts_MC = (TH1D*)fin_mc->Get("hNEvtPassCuts");
 
   TH2D *hZDCPlusMinus_MC = (TH2D*)fin_mc->Get("hZDCPlusMinus");
   if (hZDCPlusMinus_MC) hZDCPlusMinus_MC->Scale(MC_scale);
@@ -109,7 +111,7 @@ void plotFancy_MCDataComparison() {
 
   // Draw the TH1 as normal.
   hTrkPt->GetXaxis()->SetTitle("p_{T} [GeV/c]");
-  hTrkPt->GetYaxis()->SetTitle("dN/dp_{T}");
+  hTrkPt->GetYaxis()->SetTitle("dN/dp_{T} (event normalized)");
   hTrkPt->GetXaxis()->SetRangeUser(0.5, 25);
   hTrkPt->GetYaxis()->SetRangeUser(1, 2e7);
 
@@ -139,10 +141,10 @@ void plotFancy_MCDataComparison() {
     "Internal",
     false
   );
-  AddUPCHeader(ex1Pad, "9.6 TeV", "Run 393953 OO");
+  AddUPCHeader(ex1Pad, "9.6 TeV", "Run 394153 OO");
   ex1Pad->Update();
 
-  ex1Canvas->SaveAs("plots/fancy_comp_pT.pdf");
+  ex1Canvas->SaveAs(Form("%s-pT.pdf", output_prefix.c_str()));
 
 
   // ===========================================================================
@@ -157,13 +159,13 @@ void plotFancy_MCDataComparison() {
   hNEvtPassCuts->GetYaxis()->SetRangeUser(0, 1.5e6);
   hNEvtPassCuts->SetLineColor(cmsRed);
   hNEvtPassCuts->SetLineWidth(3);
-  hNEvtPassCuts->Draw();
+  hNEvtPassCuts->Draw("HIST TEXT0");
 
   // MC styling
   hNEvtPassCuts_MC->SetLineColor(kOrange+1);
   hNEvtPassCuts_MC->SetLineStyle(2);
   hNEvtPassCuts_MC->SetLineWidth(2);
-  hNEvtPassCuts_MC->Draw("HIST SAME");
+  hNEvtPassCuts_MC->Draw("HIST SAME TEXT0");
 
   TLegend* leg2 = new TLegend(0.55, 0.70, 0.85, 0.82);
   leg2->SetBorderSize(0);
@@ -179,10 +181,10 @@ void plotFancy_MCDataComparison() {
     "Internal",
     true
   );
-  AddUPCHeader(ex2Pad, "9.6 TeV", "Run 393953 OO");
+  AddUPCHeader(ex2Pad, "9.6 TeV", "Run 394153 OO");
   ex2Pad->Update();
 
-  ex2Canvas->SaveAs("plots/fancy_comp_NEvtPass.pdf");
+  ex2Canvas->SaveAs(Form("%s-NEvtPass.pdf", output_prefix.c_str()));
 
   // ===========================================================================
   TCanvas* ex3Canvas = new TCanvas("ex3Canvas", "", 800, 600);
@@ -195,9 +197,9 @@ void plotFancy_MCDataComparison() {
   divideByWidth(hTrkEta_MC);
 
   hTrkEta->GetXaxis()->SetTitle("#eta");
-  hTrkEta->GetYaxis()->SetTitle("dN/d#eta");
+  hTrkEta->GetYaxis()->SetTitle("dN/d#eta (event normalized)");
   hTrkEta->GetXaxis()->SetRangeUser(-2.4, 2.4);
-  hTrkEta->GetYaxis()->SetRangeUser(400e3, 1600e3);
+  hTrkEta->GetYaxis()->SetRangeUser(0, 1250e3);
 
   hTrkEta->SetMarkerColor(cmsRed);
   hTrkEta->SetMarkerStyle(mCircleFill);
@@ -225,10 +227,10 @@ void plotFancy_MCDataComparison() {
     "Internal",
     true
   );
-  AddUPCHeader(ex3Pad, "9.6 TeV", "Run 393953 OO");
+  AddUPCHeader(ex3Pad, "9.6 TeV", "Run 394153 OO");
   ex3Pad->Update();
 
-  ex3Canvas->SaveAs("plots/fancy_comp_eta.pdf");
+  ex3Canvas->SaveAs(Form("%s-eta.pdf", output_prefix.c_str()));
 
   // ===========================================================================
   // Plot multiplicity distribution (assuming hMult exists in your ROOT file)
@@ -242,9 +244,9 @@ void plotFancy_MCDataComparison() {
   SetTDRStyle();
 
   hMult->GetXaxis()->SetTitle("Track Multiplicity");
-  hMult->GetYaxis()->SetTitle("Counts");
+  hMult->GetYaxis()->SetTitle("Counts (event normalized)");
   hMult->GetXaxis()->SetRangeUser(0, 700);
-  hMult->GetYaxis()->SetRangeUser(1e1, 8e4);
+  hMult->GetYaxis()->SetRangeUser(1, 5e4);
   hMult->SetMarkerColor(cmsRed);
   hMult->SetMarkerStyle(mCircleFill);
   hMult->SetLineColor(cmsBlue);
@@ -271,9 +273,9 @@ void plotFancy_MCDataComparison() {
     "Internal",
     true
   );
-  AddUPCHeader(ex5Pad, "9.6 TeV", "Run 393953 OO");
+  AddUPCHeader(ex5Pad, "9.6 TeV", "Run 394153 OO");
   ex5Pad->Update();
 
-  ex5Canvas->SaveAs("plots/fancy_comp_multiplicity.pdf");
+  ex5Canvas->SaveAs(Form("%s-multiplicity.pdf", output_prefix.c_str()));
 
 }
