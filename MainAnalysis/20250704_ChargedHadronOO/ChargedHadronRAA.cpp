@@ -120,6 +120,7 @@ public:
   TH1D *hNEvtPassCuts, *hNTrkPassCuts;
   TH3D *hVXYZ;
   TH1D *hVZ_pf;
+  TH1D *hTrkWeight;
   ChargedHadronRAATreeMessenger *MChargedHadronRAA;
   string title;
 
@@ -159,6 +160,7 @@ public:
     hZDCPlusMinus = new TH2D(Form("hZDCPlusMinus%s", title.c_str()), "ZDC Plus, Minus Energy", 100, 0.0, 10000, 100, 0.0, 10000);
     hVXYZ = new TH3D(Form("hVXYZ%s", title.c_str()), "Vertex XYZ position", 100, -30.0, 30.0, 100, -30.0, 30.0, 100, -30.0, 30.0);
     hVZ_pf = new TH1D(Form("hVZ_pf%s", title.c_str()), "Vertex Z position (PF)", 100, -30.0, 30.0);
+    hTrkWeight = new TH1D(Form("hTrkWeight%s", title.c_str()), "Track Weight", 100, 1.0, 1.7);
 
     hTrkPt->Sumw2();
     hTrkEta->Sumw2();
@@ -170,6 +172,7 @@ public:
     hZDCPlusMinus->Sumw2();
     hVXYZ->Sumw2();
     hVZ_pf->Sumw2();
+    hTrkWeight->Sumw2();
 
     hNEvtPassCuts = new TH1D("hNEvtPassCuts", "Number of events passing cuts", 9, 0.5, 9.5);
     hNEvtPassCuts->GetXaxis()->SetBinLabel(1, "Total Events");
@@ -188,7 +191,7 @@ public:
     hNTrkPassCuts->GetXaxis()->SetBinLabel(2, "+ nTrk > 0");
     hNTrkPassCuts->GetXaxis()->SetBinLabel(3, "+ abs(charge)=1");
     hNTrkPassCuts->GetXaxis()->SetBinLabel(4, "+ High Purity");
-    hNTrkPassCuts->GetXaxis()->SetBinLabel(5, "+ pT > 0. GeV/c");
+    hNTrkPassCuts->GetXaxis()->SetBinLabel(5, "+ pT > 0.4 GeV/c");
     hNTrkPassCuts->GetXaxis()->SetBinLabel(6, "+ pT > 10 && Rel pT Error < 10%");
     hNTrkPassCuts->GetXaxis()->SetBinLabel(7, "+ Dxy < 3 sigma");
     hNTrkPassCuts->GetXaxis()->SetBinLabel(8, "+ Dz < 3 sigma");
@@ -252,6 +255,7 @@ public:
 
         // fill dN/dpT
         hTrkPt->Fill(MChargedHadronRAA->trkPt->at(j), eventTrkWeight);
+        hTrkWeight->Fill(trkWeight);
 
       } // end of track loop
     } // end of event loop
@@ -277,6 +281,7 @@ public:
     smartWrite(hVZ_pf);
     smartWrite(hNEvtPassCuts);
     smartWrite(hNTrkPassCuts);
+    smartWrite(hTrkWeight);
   }
 
 private:
@@ -293,6 +298,7 @@ private:
     delete hVZ_pf;
     delete hNEvtPassCuts;
     delete hNTrkPassCuts;
+    delete hTrkWeight;
   }
 };
 
