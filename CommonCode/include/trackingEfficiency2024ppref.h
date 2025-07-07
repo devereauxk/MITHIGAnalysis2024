@@ -103,7 +103,7 @@ TrkEff2024ppref::TrkEff2024ppref(bool isQuiet_, std::string filePath){
   isQuiet = isQuiet_;
     if(!isQuiet) std::cout << "TrkEff2024ppref class opening in general tracks mode!" << std::endl;
     
-    trkEff = TFile::Open( (filePath + "Eff_ppref_2024_Pythia_QCDptHat15_NopU_2D_vzpthatWeight_Nominal_10thJune2025.root").c_str(),"open");
+    trkEff = TFile::Open(filePath.c_str(),"open");
     
     if( !(trkEff->IsOpen() ) ){
       std::cout << "WARNING, COULD NOT FIND TRACK EFFICIENCY FILE FOR GENERAL TRACKS!" << std::endl;
