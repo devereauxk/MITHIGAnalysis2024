@@ -7,21 +7,16 @@ OUTPUT=${3}
 file="$FILEPATH"
 
 echo "Processing $file"
-./ExecuteChargedHadronRAA --Input "$file" \
+./ExecuteChargedHadronRAA \
+   --Input "$file" \
    --Output ${OUTPUT}/output_${COUNTER}.root \
-   --DoGenLevel false \
-   --Year 2024 \
    --IsData true \
    --IsPP true \
-   --Fraction 1.0 \
-   --ApplyTriggerRejection true \
-   --ApplyEventRejection true \
-   --ApplyTrackRejection true \
-   --PFTree particleFlowAnalyser/pftree \
-   --sampleType -1 \
-   --DebugMode true \
-   --TrackEfficiencyPath ${ProjectBase}/CommonCode/root/ \
-   --HideProgressBar false
+   --UseTrackWeight false \
+   --UseEventWeight false \
+   --ApplyEventSelection true \
+   --MinTrackPt 0.4 \
+   --ScaleFactor 1
 wait
 
 sleep 0.1

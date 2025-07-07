@@ -150,15 +150,16 @@ void plotRatioLogy(vector<TH1*> hists, const char* title, vector<string> labels,
     leg->Draw("SAME");
 }
 
-void plot2D(TH2D* hist, const char* title,
+void plot2D(TH2* hist, const char* title,
     const char* xTitle, double xmin, double xmax,
-    const char* yTitle, double ymin, double ymax) {
+    const char* yTitle, double ymin, double ymax,
+    bool logz = true) {
 
     TPad *pad1 = new TPad(title, title, 0, 0, 1, 1);
     pad1->SetBottomMargin(0.18); // Increase bottom margin for x-axis labels/ticks
     pad1->SetLogx(0);
     pad1->SetLogy(0);
-    pad1->SetLogz(1);
+    pad1->SetLogz(logz);
     pad1->Draw();
     pad1->cd();
 
@@ -209,7 +210,13 @@ void plotSimple(vector<TH1*> hists, const char* title, vector<string> labels,
         }
     }
     // Add some margin
-    double margin = 0.2 * (global_max - global_min);
+    double margin;
+    if (logy) {
+        margin = exp((log(global_max) - log((global_min > 0) ? global_min : 1)) * 1.2);
+        cout<<"Global min: " << global_min << ", Global max: " << global_max << ", Margin: " << margin << endl;
+    } else {
+        margin = 0.2 * (global_max - global_min);
+    }
 
     for (size_t ih = 0; ih < hists.size(); ++ih) {
         TH1* hist = hists[ih];
@@ -233,9 +240,18 @@ void plotSimple(vector<TH1*> hists, const char* title, vector<string> labels,
 
         // Auto-scale y axis if ymin < ymax, otherwise use global min/max
         if (ymin < ymax) {
+            // If logy, ensure ymin > 0
+            if (logy && ymin <= 0) {
+            hist->GetYaxis()->SetRangeUser(1, ymax);
+            } else {
             hist->GetYaxis()->SetRangeUser(ymin, ymax);
+            }
         } else {
-            hist->GetYaxis()->SetRangeUser(global_min - margin, global_max + margin);
+            if (logy && global_min <= 0) {
+                hist->GetYaxis()->SetRangeUser(1, global_max + margin);
+            } else {
+                hist->GetYaxis()->SetRangeUser(global_min - margin, global_max + margin);
+            }
         }
 
         hist->SetLineColor(scolors[ih]);
@@ -255,7 +271,12 @@ void plotSimple(vector<TH1*> hists, const char* title, vector<string> labels,
             hist->Draw("HIST SAME");
         }
 
-        // If binnums is true, print the letter 'a' above each bin
+        // Old way: draw bin content above each bin using "TEXT0" option
+        if (binnums) {
+            hist->Draw("SAME TEXT0");
+        }
+
+        /*
         if (binnums) {
             for (int bin = 1; bin <= hist->GetNbinsX(); ++bin) {
             double x = hist->GetBinCenter(bin);
@@ -268,6 +289,7 @@ void plotSimple(vector<TH1*> hists, const char* title, vector<string> labels,
             latex.DrawLatex(x, y_offset, Form("%.0f", y));
             }
         }
+        */
 
         if (labels.size() > ih)
             leg->AddEntry(hist, labels[ih].c_str(), "l");
@@ -276,128 +298,3 @@ void plotSimple(vector<TH1*> hists, const char* title, vector<string> labels,
     leg->Draw("SAME");
 }
 
-void plotEventSel(const char* input =   "output/output.root", const char* output =  "plots/event_selection", bool doCrossCheck = true, const char* crossCheckInput = "ppzerobias_crosscheck.root") {
-
-    TFile* fin = TFile::Open(input, "READ");
-    if (!fin || fin->IsZombie()) {
-        std::cerr << "Error: Unable to open file " << fin << std::endl;
-        return;
-    }
-
-    TFile* fin_corr = TFile::Open("output/output_trackCor.root", "READ");
-    if (!fin_corr || fin_corr->IsZombie()) {
-        std::cerr << "Error: Unable to open file output/output_trackCor.root" << std::endl;
-        return;
-    }
-
-    TH1D* hNEvtPassCuts = (TH1D*)fin->Get("hNEvtPassCuts");
-    TH1D* hNTrkPassCuts = (TH1D*)fin->Get("hNTrkPassCuts");
-
-    TH2D* hTrkPtEta = (TH2D*)fin->Get("hTrkPtEta");
-    //TH1D* hTrkPt = (TH1D*) hTrkPtEta->ProjectionX("hTrkPt");
-    TH1D* hTrkPt = (TH1D*)fin->Get("hTrkPt");
-    TH1D* hTrkEta = (TH1D*) hTrkPtEta->ProjectionY("hTrkEta");
-
-    TH2D* hTrkPtEta_corr = (TH2D*)fin_corr->Get("hTrkPtEta");
-    hTrkPtEta_corr->SetName("hTrkPtEta_corr");
-    TH1D* hTrkPt_corr = (TH1D*) hTrkPtEta_corr->ProjectionX("hTrkPt_corr");
-    TH1D* hTrkEta_corr = (TH1D*) hTrkPtEta_corr->ProjectionY("hTrkEta_corr");
-
-    TH1D* hVZ = (TH1D*)fin->Get("hVZ");
-    TH1D* hVZ_pf = (TH1D*)fin->Get("hVZ_pf");
-
-    // Divide by bin width
-    divideByWidth(hTrkPt);
-    divideByWidth(hTrkEta);
-    divideByWidth(hTrkPt_corr);
-    divideByWidth(hTrkEta_corr);
-
-    // make canvas
-    TCanvas* c1 = new TCanvas("c1", "c1", 1600, 2400);
-    c1->Divide(2, 4);
-
-    c1->cd(1);
-    plotSimple(
-        {hNEvtPassCuts}, "NEvtPassCuts", {"NEvtPassCuts"},
-        "", -1, -1,
-        "Counts", 0, 1e5,
-        false, false,
-        true
-    );
-
-    c1->cd(2);
-    plotSimple(
-        {hNTrkPassCuts}, "NTrkPassCuts", {"NTrkPassCuts"},
-        "", -1, -1,
-        "Counts", -1, -1,
-        false, false,
-        true
-    );
-    // print bin contents without scientific notation
-    std::cout<< "NTrkPassCuts bin contents: "<<endl;
-    std::cout << std::fixed;
-    for (int i = 1; i <= hNTrkPassCuts->GetNbinsX(); ++i) {
-        std::cout << hNTrkPassCuts->GetBinContent(i) <<endl;
-    }
-    std::cout << std::endl;
-
-    c1->cd(3);
-    plotSimple(
-        {hTrkPt, hTrkPt_corr}, "hTrkPt", {"hTrkPt", "hTrkPt w trkCorr"},
-        "Track pT [GeV/c]", 1, 20,
-        "dN/dp_{T}", 1, 1e7,
-        false, true
-    );
-    
-    c1->cd(4);
-    plotSimple(
-        {hTrkEta, hTrkEta_corr}, "hTrkEta", {"hTrkEta", "hTrkEta w trkCorr"},
-        "Track #eta", -3, 3,
-        "dN/d#eta", 1, 1e7,
-        false, true
-    );
-
-    // Save as png
-    if (!doCrossCheck) {
-        c1->SaveAs(Form("%s.png", output));
-        return;
-    }
-
-    // Load in cross-check histogram
-    // Vipul's cross-check direct from their forest output
-    TFile* fin_crossCheck = TFile::Open(crossCheckInput, "READ");
-    TH1F* hTrkPt_crossCheck = (TH1F*)fin_crossCheck->Get("htrkpt_split");
-    divideByWidth(hTrkPt_crossCheck);
-
-    c1->cd(5);
-    plotRatioLogy(
-        {hTrkPt, hTrkPt_crossCheck}, "Track p_{T}", {"Skim [Kyle]", "Forest [Vipul]"},
-        "Track pT [GeV/c]", 1, 20,
-        "dN/dp_{T}", 1, 1e7,
-        "Forest/Skim", 0.95, 1.05,
-        0, true, false
-    );
-
-    c1->cd(7);
-    plotSimple(
-        {hVZ, hVZ_pf}, "Vertex Z", {"VZ", "VZ_pf"},
-        "counts", -20, 20,
-        "VZ", 20, 1e4,
-        false, true
-    );
-
-    // Print hVZ - hVZ_pf for each bin
-    std::cout << std::endl;
-    std::cout << "hVZ - hVZ_pf bin differences:" << std::endl;
-    int nBins = std::min(hVZ->GetNbinsX(), hVZ_pf->GetNbinsX());
-    float sum = 0;
-    for (int i = 1; i <= nBins; ++i) {
-        double diff = hVZ->GetBinContent(i) - hVZ_pf->GetBinContent(i);
-        sum += diff;
-        std::cout << "Bin " << i << ": " << diff << std::endl;
-    }
-    std::cout << "Total difference: " << sum << std::endl;
-
-    c1->SaveAs(Form("%s.png", output));
-
-}

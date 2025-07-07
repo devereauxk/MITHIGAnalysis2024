@@ -9,14 +9,14 @@ source clean.sh
 #OUTPUTANALYSIS=output/20250705_OO_394153_FIRSTLOOK_only25_eventSel_min04_HFAND14_HFAND12.root
 
 INPUT=/data00/bakovacs/OOsamples/Skims/20250705_OO_394153_FIRSTLOOK.root
-OUTPUTANALYSIS=output/20250705_OO_394153_FIRSTLOOK_eventSel_min04_HFAND14_HFAND12.root
+OUTPUTANALYSIS=output/20250705_OO_394153_FIRSTLOOK_eventSel_min04_HFAND14_HFAND12_trackWeighted.root
 
 ./ExecuteChargedHadronRAA \
   --Input $INPUT \
   --Output $OUTPUTANALYSIS \
   --IsData true \
   --IsPP false \
-  --UseTrackWeight false \
+  --UseTrackWeight true \
   --UseEventWeight false \
   --ApplyEventSelection true \
   --MinTrackPt 0.4 \
