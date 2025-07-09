@@ -1,74 +1,22 @@
-
 #!/bin/bash
-## FIXME: need to use your own path to the skimmed data
-PATHSKIM=/data00/kdeverea/OOsamples/Skims
 
-TRACKPTMIN=1
-TRIGGER=0
-ISDATA=1
-SCALEFACTOR=1.0
-
+# ============================================================
+# OO data
+# ============================================================
 source clean.sh
-INPUT=$PATHSKIM/output_20250703_Skim_ppref2024_all/output_0.root
 
-OUTPUTANALYSIS=output/output.root
+INPUT=/data00/kdeverea/OOsamples/Skims/20250708_Skim_ppref2024_debug_noTrackEventSelection.root
+OUTPUTANALYSIS=output/20250708_Skim_ppref2024_debug_noTrackEventSelection_min04_noTrack.root
+
 ./ExecuteChargedHadronRAA \
   --Input $INPUT \
-  --IsData $ISDATA \
   --Output $OUTPUTANALYSIS \
-  --ScaleFactor $SCALEFACTOR
-
-# with track efficiency correction weight applied
-OUTPUTANALYSIS=output/output_trackCor.root
-./ExecuteChargedHadronRAA \
-  --Input $INPUT \
-  --IsData $ISDATA \
-  --Output $OUTPUTANALYSIS \
-  --ScaleFactor $SCALEFACTOR \
-  --UseTrackWeight true
-
-root -l -q -b "plotEventSel.C(\"output/output.root\", \"plots/temp\", true)"
-
-exit
-
-source clean.sh
-INPUT=$PATHSKIM/20250701_Skim_ppref2024_debug.root
-
-OUTPUTANALYSIS=output/output.root
-./ExecuteChargedHadronRAA \
-  --Input $INPUT \
-  --IsData $ISDATA \
-  --Output $OUTPUTANALYSIS \
-  --ScaleFactor $SCALEFACTOR
-
-# with track efficiency correction weight applied
-OUTPUTANALYSIS=output/output_trackCor.root
-./ExecuteChargedHadronRAA \
-  --Input $INPUT \
-  --IsData $ISDATA \
-  --Output $OUTPUTANALYSIS \
-  --ScaleFactor $SCALEFACTOR \
-  --UseTrackWeight true
-
-root -l -q -b "plotEventSel.C(\"output/output.root\", \"plots/crosscheck\", true)"
-
-source clean.sh
-INPUT=$PATHSKIM/20250701_Skim_ppref2024_debug_noTrackRejection.root
-
-OUTPUTANALYSIS=output/output.root
-./ExecuteChargedHadronRAA \
-  --Input $INPUT \
-  --IsData $ISDATA \
-  --Output $OUTPUTANALYSIS \
-  --ScaleFactor $SCALEFACTOR
-
-# with track efficiency correction weight applied
-OUTPUTANALYSIS=output/output_trackCor.root
-./ExecuteChargedHadronRAA \
-  --Input $INPUT \
-  --IsData $ISDATA \
-  --Output $OUTPUTANALYSIS \
-  --ScaleFactor $SCALEFACTOR \
-  --UseTrackWeight true
-
-root -l -q -b "plotEventSel.C(\"output/output.root\", \"plots/crosscheck_noTrackRejection\", true)"
+  --IsData true \
+  --IsPP true \
+  --ApplyEventSelection true \
+  --UseEventWeight false \
+  --UseTrackWeight false \
+  --TrackWeightSelection 4 \
+  --MinTrackPt 0.4 \
+  --MinLeadingTrackPt -1 \
+  --ScaleFactor 1

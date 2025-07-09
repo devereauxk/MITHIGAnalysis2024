@@ -27,7 +27,7 @@ echo "Processing $FILE"
    --sampleType -1 \
    --DebugMode true \
    --TrackEfficiencyPath ${ProjectBase}/CommonCode/root/ \
-   --HideProgressBar false
+   --HideProgressBar true
 wait
 
 sleep 0.2

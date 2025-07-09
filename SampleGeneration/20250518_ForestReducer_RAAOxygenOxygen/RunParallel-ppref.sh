@@ -3,7 +3,7 @@ DATE=$(date +%Y%m%d)
 
 source clean.sh
 
-MAXCORES=30 # too many parallel cores can cause event loss, increase with caution!
+MAXCORES=40 # too many parallel cores can cause event loss, increase with caution!
 NFILES=-1 # number of files to cap the processing at, if -1 processess all files
 # set =1 for agreed upon debug file for Vipul comparison (we just used his first file in the directory HiForestMiniAOD_1.root), set =999 for full production
 INPUT_ON_XRD=1 # set to 1 if input files are on xrd, 0 if they are local

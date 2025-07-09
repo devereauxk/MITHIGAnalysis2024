@@ -5,18 +5,15 @@
 # ============================================================
 source clean.sh
 
-#INPUT=/data00/bakovacs/OOsamples/Skims/20250705_OO_394153_FIRSTLOOK_only25.root
-#OUTPUTANALYSIS=output/20250705_OO_394153_FIRSTLOOK_only25_eventSel_min04_HFAND14_HFAND12.root
-
-INPUT=/data00/bakovacs/OOsamples/Skims/20250705_OO_394153_FIRSTLOOK.root
-OUTPUTANALYSIS=output/20250705_OO_394153_FIRSTLOOK_eventSel_min04_HFAND14_HFAND12_trackWeighted.root
+INPUT=/data00/bakovacs/OOsamples/Skims/20250709_NeNe_394270_PhysicsIonPhysics0_250708_201011.root
+OUTPUTANALYSIS=output/20250709_NeNe_394270_PhysicsIonPhysics0_250708_201011_noTrack.root
 
 ./ExecuteChargedHadronRAA \
   --Input $INPUT \
   --Output $OUTPUTANALYSIS \
   --IsData true \
   --IsPP false \
-  --UseTrackWeight true \
+  --UseTrackWeight false \
   --UseEventWeight false \
   --ApplyEventSelection true \
   --MinTrackPt 0.4 \

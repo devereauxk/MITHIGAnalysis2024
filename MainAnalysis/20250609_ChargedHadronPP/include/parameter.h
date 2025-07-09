@@ -25,6 +25,7 @@ public:
   bool UseEventWeight; // Use event weight
   bool ApplyEventSelection; // Apply event selection criteria
   float MinLeadingTrackPt = 0.4; // Minimum leading track pT for event selection
+  int TrackWeightSelection = 1; // Selection criteria for track weight
   void printParameters() const {
 
     cout << "Input file: " << input << endl;
@@ -39,6 +40,7 @@ public:
     cout << "UseEventWeight: " << UseEventWeight << endl;
     cout << "ApplyEventSelection: " << ApplyEventSelection << endl;
     cout << "MinLeadingTrackPt: " << MinLeadingTrackPt << endl;
+    cout << "TrackWeightSelection: " << TrackWeightSelection << endl;
   }
 };
 

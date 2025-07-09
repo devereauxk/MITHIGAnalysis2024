@@ -6,17 +6,17 @@
 
 #include "include/plotting.h" // Kyle's plotting utilities
 
-void plotMCDataComparison() {
+void plotDiagnostic() {
 
     vector<string> labels = {"OO Run 394153", "OO Run 394153, track correction", "OO HIJING"};
     vector<string> inputFiles = {
-        "output/20250705_OO_394153_FIRSTLOOK_eventSel_min04_HFAND14_HFAND12.root",
-        "output/20250705_OO_394153_FIRSTLOOK_eventSel_min04_HFAND14_HFAND12_trackWeighted.root",
+        "output/20250709_NeNe_394270_PhysicsIonPhysics0_250708_201011.root",
+        "output/20250709_NeNe_394270_PhysicsIonPhysics0_250708_201011_noTrack.root",
         "output/skim_HiForest_250520_Hijing_MinimumBias_b015_OO_5362GeV_250518_eventSel_min04_HFAND14_HFAND12.root"
     };
-    const char* output = "plots/394153_min04_HFAND14_HFAND12_trackWeighted";
+    const char* output = "plots/20250709_NeNe_394270_PhysicsIonPhysics0_250708_201011";
 
-    float MC_scale = 534170. / 892630.; // Scale factor for MC histograms
+    float MC_scale = 96727. / 892630.; // Scale factor for MC histograms
 
     vector<TH1*> hNEvtPassCuts, hNTrkPassCuts, hTrkPt, hTrkEta, hMult, hhiHF_pf, hVZ_pf;
     vector<TH2*> hTrkPtEta, hHFEMaxPlusMinus, hhiHFPlusMinus_pf, hZDCPlusMinus;

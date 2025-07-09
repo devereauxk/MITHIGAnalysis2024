@@ -13,15 +13,15 @@ void plotFancy() {
   // Make output directory and simple hists for examples
   system("mkdir -p ./plots");
 
-  vector<string> labels = {"OO Run 394270", "tracks uncorrected", "OO HIJING MC Reco"};
+  vector<string> labels = {"ppref, loose", "ppref, nominal", "ppref, tight", "ppref, 2017", "uncorrected"};
   vector<string> inputFiles = {
-      "output/20250709_NeNe_394270_PhysicsIonPhysics0_250708_201011.root",
-      "output/20250709_NeNe_394270_PhysicsIonPhysics0_250708_201011_noTrack.root",
-      "output/skim_HiForest_250520_Hijing_MinimumBias_b015_OO_5362GeV_250518_eventSel_min04_HFAND14_HFAND12.root"
+      "output/output_20250708_Skim_ppref2024_all_Loose.root",
+      "output/output_20250708_Skim_ppref2024_all_Nominal.root",
+      "output/output_20250708_Skim_ppref2024_all_Tight.root",
+      "output/output_20250708_Skim_ppref2024_all_2017.root",
+      "output/output_20250708_Skim_ppref2024_all_noTrack.root"
   };
-  const char* output = "plots/20250709_NeNe_394270_PhysicsIonPhysics0_250708_201011";
-
-  float MC_scale = 96727./892630; // Scale factor for MC histograms
+  const char* output = "plots/output_20250708_Skim_ppref2024_all_trackWeightingsOverlay";
 
   vector<TH1*> hNEvtPassCuts, hNTrkPassCuts, hTrkPt, hTrkEta, hMult, hVZ_pf, hTrkWeight;
   vector<TH2*> hTrkPtEta;
@@ -48,13 +48,6 @@ void plotFancy() {
       // Divide by bin width
       divideByWidth(hTrkPt.back());
       divideByWidth(hTrkEta.back());
-
-      if (i == 2) {
-          // Scale MC histograms
-          hTrkPt.back()->Scale(MC_scale);
-          hTrkEta.back()->Scale(MC_scale);
-          hMult.back()->Scale(MC_scale);
-      }
   }
   
   // ===========================================================================
@@ -63,10 +56,10 @@ void plotFancy() {
 
   TPad* pad1 = (TPad*) plotCMSSimple(
     ex1Canvas, hTrkPt, "", labels,
-    {cmsBlue, cmsGray, cmsYellow}, {0, 1, 1},
+    {cmsTealL1, cmsBlue, cmsTealD1, cmsYellow, cmsGray}, {2, 0, 2, 1, 1},
     {cmsRed, cmsRed, cmsRed, cmsRed, cmsRed}, {mCircleFill, mCircleFill, mCircleFill, mCircleFill, mCircleFill},
     "Track pT [GeV/c]", 0.5, 25,
-    "dN/dp_{T}", -1, -1,
+    "dN/dp_{T}", 1, 1e10,
     false, true
   );
 
@@ -76,7 +69,7 @@ void plotFancy() {
       "Internal", // (optional) Add a subheader to the CMS header
       false
   );
-  AddUPCHeader(pad1, "5.26 TeV", "OO Run 394270");
+  AddUPCHeader(pad1, "5.26 TeV", "pp ref");
   pad1->Update();
 
   /*
@@ -99,12 +92,12 @@ void plotFancy() {
 
   TPad* pad_ratio = (TPad*) plotCMSRatio(
     hTrkPt, "", labels,
-    {cmsBlue, cmsGray, cmsYellow}, {0, 1, 1},
+    {cmsTealL1, cmsBlue, cmsTealD1, cmsYellow, cmsGray}, {2, 0, 2, 1, 1},
     {cmsRed, cmsRed, cmsRed, cmsRed, cmsRed}, {mCircleFill, mCircleFill, mCircleFill, mCircleFill, mCircleFill},
     "Track pT [GeV/c]", 3, 50,
-    "dN/dp_{T}", -1, -1,
-    "Ratio over corrected      ", 0.5, 1.5,
-    0, true
+    "dN/dp_{T}", 1, 1e9,
+    "Ratio over nominal      ", 0.85, 1.15,
+    1, true
   );
 
   // >>> Add the CMS header
@@ -113,7 +106,7 @@ void plotFancy() {
       "Internal", // (optional) Add a subheader to the CMS header
       false
   );
-  AddUPCHeader(pad_ratio, "5.26 TeV", "OO Run 394270");
+  AddUPCHeader(pad_ratio, "5.26 TeV", "pp ref");
   pad_ratio->Update();
 
   /*
@@ -137,7 +130,7 @@ void plotFancy() {
     ex2Canvas, {hNEvtPassCuts[0]}, "", {labels[0]},
     {cmsRed}, {0}, {cmsBlack}, {0},
     "", -1, -1,
-    "Events passed", -1, -1,
+    "Events passed", 0, 160e6,
     false, false, true
   );
 
@@ -146,7 +139,7 @@ void plotFancy() {
     "Internal", // (optional) Add a subheader to the CMS header
     true
   );
-  AddUPCHeader(pad_Nevt, "5.26 TeV", "OO Run 394270");
+  AddUPCHeader(pad_Nevt, "5.26 TeV", "pp ref");
   pad_Nevt->Update();
 
   // That's it!
@@ -157,10 +150,10 @@ void plotFancy() {
   
   TPad* pad_eta = (TPad*) plotCMSSimple(
     ex3Canvas, hTrkEta, "", labels,
-    {cmsBlue, cmsGray, cmsYellow}, {0, 1, 1},
+    {cmsTealL1, cmsBlue, cmsTealD1, cmsYellow, cmsGray}, {2, 0, 2, 1, 1},
     {cmsRed, cmsRed, cmsRed, cmsRed, cmsRed}, {mCircleFill, mCircleFill, mCircleFill, mCircleFill, mCircleFill},
     "#eta", -2.4, 2.4,
-    "dN/d#eta", -1, -1,
+    "dN/d#eta", 0, 1200e6,
     false, false
   );
 
@@ -169,7 +162,7 @@ void plotFancy() {
     "Internal", // (optional) Add a subheader to the CMS header
     true
   );
-  AddUPCHeader(pad_eta, "5.26 TeV", "OO Run 394270");
+  AddUPCHeader(pad_eta, "5.26 TeV", "pp ref");
   pad_eta->Update();
 
   // That's it!
@@ -177,7 +170,6 @@ void plotFancy() {
 
   // ===========================================================================
   // EXAMPLE 4: Plot TProfile of hTrkWeightPt (average weight vs trackPt) ------
-  /*
   TCanvas* ex4Canvas = new TCanvas("ex4Canvas", "", 800, 600);
 
   // Make TProfiles from hTrkWeightPt and convert to TH1Ds
@@ -190,7 +182,7 @@ void plotFancy() {
 
   TPad* pad_weights = (TPad*) plotCMSSimple(
     ex4Canvas, profTrkWeightPt, "", labels,
-    {cmsBlue, cmsGray, cmsYellow}, {0, 1, 1},
+    {cmsTealL1, cmsBlue, cmsTealD1, cmsYellow, cmsGray}, {2, 0, 2, 1, 1},
     {cmsRed, cmsRed, cmsRed, cmsRed, cmsRed}, {mCircleFill, mCircleFill, mCircleFill, mCircleFill, mCircleFill},
     "Track p_{T} [GeV/c]", 0.5, 50,
     "Average track weight", 0.8, 1.5,
@@ -202,9 +194,9 @@ void plotFancy() {
     "Internal", // (optional) Add a subheader to the CMS header
     true
   );
-  AddUPCHeader(pad_weights, "5.26 TeV", "OO Run 394270");
+  AddUPCHeader(pad_weights, "5.26 TeV", "pp ref");
 
-  ex4Canvas->SaveAs("plots/fancy_trkWeight_vs_pt.pdf");
-  */
+  ex4Canvas->SaveAs(Form("%s_weights.pdf", output));
+
 
 }

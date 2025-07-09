@@ -199,7 +199,7 @@ public:
       }
 
       // event-level histograms
-      hMult->Fill(MChargedHadronRAA->multipicityEta2p4, eventWeight);
+      hMult->Fill(MChargedHadronRAA->multiplicityEta2p4, eventWeight);
       hVXYZ->Fill(MChargedHadronRAA->VX, MChargedHadronRAA->VY, MChargedHadronRAA->VZ, eventWeight);
       hVZ_pf->Fill(MChargedHadronRAA->VZ_pf, eventWeight);
 
@@ -209,7 +209,10 @@ public:
         // get track selection efficiency correction
         float trkWeight = 1.0;
         if (par.UseTrackWeight) {
-          trkWeight *= MChargedHadronRAA->trackWeight->at(j);
+          if (par.TrackWeightSelection == 1) trkWeight *= MChargedHadronRAA->trackingEfficiency_Loose->at(j);
+          else if (par.TrackWeightSelection == 2) trkWeight *= MChargedHadronRAA->trackingEfficiency_Nominal->at(j);
+          else if (par.TrackWeightSelection == 3) trkWeight *= MChargedHadronRAA->trackingEfficiency_Tight->at(j);
+          else if (par.TrackWeightSelection == 4) trkWeight *= MChargedHadronRAA->trackingEfficiency2017pp->at(j);
         }
         float eventTrkWeight = eventWeight * trkWeight;
 
@@ -292,6 +295,7 @@ int main(int argc, char *argv[]) {
   par.UseEventWeight  = CL.GetBool("UseEventWeight", true);
   par.ApplyEventSelection = CL.GetBool("ApplyEventSelection", true);
   par.MinLeadingTrackPt = CL.GetDouble("MinLeadingTrackPt", -1); // Minimum leading track pT for event selection
+  par.TrackWeightSelection = CL.GetInt("TrackWeightSelection", 1); // Selection criteria for track weight
   // Removed HF flags
   // par.OnlineHFAND     = CL.GetDouble("OnlineHFAND", -1);
   // par.OfflineHFAND    = CL.GetDouble("OfflineHFAND", -1);

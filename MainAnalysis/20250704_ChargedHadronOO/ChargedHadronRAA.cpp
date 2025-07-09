@@ -225,7 +225,7 @@ public:
       }
 
       // event-level histograms
-      hMult->Fill(MChargedHadronRAA->multipicityEta2p4, eventWeight);
+      hMult->Fill(MChargedHadronRAA->multiplicityEta2p4, eventWeight);
       hhiHF_pf->Fill(MChargedHadronRAA->hiHF_pf, eventWeight);
       hHFEMaxPlusMinus->Fill(MChargedHadronRAA->HFEMaxPlus, MChargedHadronRAA->HFEMaxMinus, eventWeight);
       hhiHFPlusMinus_pf->Fill(MChargedHadronRAA->hiHFPlus_pf, MChargedHadronRAA->hiHFMinus_pf, eventWeight);
