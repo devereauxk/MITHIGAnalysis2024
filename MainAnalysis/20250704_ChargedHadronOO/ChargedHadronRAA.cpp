@@ -121,6 +121,7 @@ public:
   TH3D *hVXYZ;
   TH1D *hVZ_pf;
   TH1D *hTrkWeight;
+  TH2D *hTrkWeightPt, *hTrkWeightEta;
   ChargedHadronRAATreeMessenger *MChargedHadronRAA;
   string title;
 
@@ -160,7 +161,9 @@ public:
     hZDCPlusMinus = new TH2D(Form("hZDCPlusMinus%s", title.c_str()), "ZDC Plus, Minus Energy", 100, 0.0, 10000, 100, 0.0, 10000);
     hVXYZ = new TH3D(Form("hVXYZ%s", title.c_str()), "Vertex XYZ position", 100, -30.0, 30.0, 100, -30.0, 30.0, 100, -30.0, 30.0);
     hVZ_pf = new TH1D(Form("hVZ_pf%s", title.c_str()), "Vertex Z position (PF)", 100, -30.0, 30.0);
-    hTrkWeight = new TH1D(Form("hTrkWeight%s", title.c_str()), "Track Weight", 100, 1.0, 1.7);
+    hTrkWeight = new TH1D(Form("hTrkWeight%s", title.c_str()), "Track Weight", 100, 1, 1.7);
+    hTrkWeightPt = new TH2D(Form("hTrkWeightPt%s", title.c_str()), "Track Weight vs pT", nPtBins_log, pTBins_log, 100, 1, 1.7);
+    hTrkWeightEta = new TH2D(Form("hTrkWeightEta%s", title.c_str()), "Track Weight vs #eta", 50, -3.0, 3.0, 100, 1, 1.7);
 
     hTrkPt->Sumw2();
     hTrkEta->Sumw2();
@@ -173,6 +176,8 @@ public:
     hVXYZ->Sumw2();
     hVZ_pf->Sumw2();
     hTrkWeight->Sumw2();
+    hTrkWeightPt->Sumw2();
+    hTrkWeightEta->Sumw2();
 
     hNEvtPassCuts = new TH1D("hNEvtPassCuts", "Number of events passing cuts", 9, 0.5, 9.5);
     hNEvtPassCuts->GetXaxis()->SetBinLabel(1, "Total Events");
@@ -256,6 +261,8 @@ public:
         // fill dN/dpT
         hTrkPt->Fill(MChargedHadronRAA->trkPt->at(j), eventTrkWeight);
         hTrkWeight->Fill(trkWeight);
+        hTrkWeightPt->Fill(MChargedHadronRAA->trkPt->at(j), trkWeight);
+        hTrkWeightEta->Fill(MChargedHadronRAA->trkEta->at(j), trkWeight);
 
       } // end of track loop
     } // end of event loop
@@ -282,6 +289,8 @@ public:
     smartWrite(hNEvtPassCuts);
     smartWrite(hNTrkPassCuts);
     smartWrite(hTrkWeight);
+    smartWrite(hTrkWeightPt);
+    smartWrite(hTrkWeightEta);
   }
 
 private:
@@ -299,6 +308,8 @@ private:
     delete hNEvtPassCuts;
     delete hNTrkPassCuts;
     delete hTrkWeight;
+    delete hTrkWeightPt;
+    delete hTrkWeightEta;
   }
 };
 

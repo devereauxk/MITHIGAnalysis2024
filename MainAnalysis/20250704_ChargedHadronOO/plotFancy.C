@@ -177,7 +177,6 @@ void plotFancy() {
 
   // ===========================================================================
   // EXAMPLE 4: Plot TProfile of hTrkWeightPt (average weight vs trackPt) ------
-  /*
   TCanvas* ex4Canvas = new TCanvas("ex4Canvas", "", 800, 600);
 
   // Make TProfiles from hTrkWeightPt and convert to TH1Ds
@@ -204,7 +203,6 @@ void plotFancy() {
   );
   AddUPCHeader(pad_weights, "5.26 TeV", "OO Run 394270");
 
-  ex4Canvas->SaveAs("plots/fancy_trkWeight_vs_pt.pdf");
-  */
+  ex4Canvas->SaveAs(Form("%s_trkWeight_vs_pt.pdf", output));
 
 }

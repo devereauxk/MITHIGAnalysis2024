@@ -6,7 +6,7 @@
 source clean.sh
 
 INPUT=/data00/kdeverea/OOsamples/Skims/20250708_Skim_ppref2024_debug_noTrackEventSelection.root
-OUTPUTANALYSIS=output/20250708_Skim_ppref2024_debug_noTrackEventSelection_min04_noTrack.root
+OUTPUTANALYSIS=output/20250708_Skim_ppref2024_debug_noTrackEventSelection_min01_noTrack.root
 
 ./ExecuteChargedHadronRAA \
   --Input $INPUT \
@@ -17,6 +17,6 @@ OUTPUTANALYSIS=output/20250708_Skim_ppref2024_debug_noTrackEventSelection_min04_
   --UseEventWeight false \
   --UseTrackWeight false \
   --TrackWeightSelection 4 \
-  --MinTrackPt 0.4 \
+  --MinTrackPt 0.1 \
   --MinLeadingTrackPt -1 \
   --ScaleFactor 1
