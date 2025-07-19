@@ -10,7 +10,7 @@ INPUT_ON_XRD=1 # set to 1 if input files are on xrd, 0 if they are local
 #XRDSERV="root://xrootd.cmsaf.mit.edu/" # mit t2 server
 XRDSERV="root://eoscms.cern.ch/" # eos xrootd server, path should start /store/group...
 
-NAME="${DATE}_Skim_ppref2024_all"
+NAME="${DATE}_Skim_ppref2024_all_noEvtSel"
 PATHSAMPLE="/store/group/phys_heavyions/vpant/ppref2024output/PPRefZeroBiasPlusForward4/crab_ppref2024/250324_080237/0000"
 # set your output directory here
 OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME"

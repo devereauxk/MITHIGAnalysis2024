@@ -9,11 +9,17 @@ SAMPLETYPE=${6}
 SAVETRIGGERBITS=${7}
 DEBUGMODE=${8}
 INCLUDEPPSANDFSC=${9}
+INCLUDEPF=${10}
+SERVER=${11}
+MAXCORES=${12}
 
+mkdir -p "${OUTPUT}/temp_inputs/"
+FILE="${OUTPUT}/temp_inputs/job_${COUNTER}.root"
+rm $FILE &> /dev/null
+xrdcp -N --parallel $MAXCORES -t 2 $SERVER$FILEPATH $FILE
+wait
 
-file="$FILEPATH"
-
-./Execute --Input "$file" \
+./Execute --Input "$FILE" \
    --Output ${OUTPUT}/output_${COUNTER}.root \
    --DoGenLevel $DOGENLEVEL \
    --Year 2025 \
@@ -27,10 +33,12 @@ file="$FILEPATH"
    --sampleType $SAMPLETYPE \
    --DebugMode $DEBUGMODE \
    --includeFSCandPPSMode $INCLUDEPPSANDFSC \
+   --includePFMode $INCLUDEPF \
    --saveTriggerBitsMode $SAVETRIGGERBITS \
    --TrackEfficiencyPath ${ProjectBase}/CommonCode/root/ \
-   --HideProgressBar false
+   --HideProgressBar true
 wait
 
-sleep 0.1
+sleep 0.2
+rm $FILE
 wait
