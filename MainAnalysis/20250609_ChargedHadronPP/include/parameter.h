@@ -24,8 +24,10 @@ public:
   bool UseTrackWeight; // Use track weight
   bool UseEventWeight; // Use event weight
   bool ApplyEventSelection; // Apply event selection criteria
-  float MinLeadingTrackPt = 0.4; // Minimum leading track pT for event selection
-  int TrackWeightSelection = 1; // Selection criteria for track weight
+  float MinLeadingTrackPt; // Minimum leading track pT for event selection
+  int TrackWeightSelection; // Selection criteria for track weight
+  string EventCorrectionFile; // File for event selection efficiency
+  bool HideProgressBar; // Hide progress bar in output
   void printParameters() const {
 
     cout << "Input file: " << input << endl;
@@ -41,6 +43,8 @@ public:
     cout << "ApplyEventSelection: " << ApplyEventSelection << endl;
     cout << "MinLeadingTrackPt: " << MinLeadingTrackPt << endl;
     cout << "TrackWeightSelection: " << TrackWeightSelection << endl;
+    cout << "EventCorrectionFile: " << EventCorrectionFile << endl;
+    cout << "HideProgressBar: " << HideProgressBar << endl;
   }
 };
 

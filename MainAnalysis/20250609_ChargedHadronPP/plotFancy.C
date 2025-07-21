@@ -13,6 +13,7 @@ void plotFancy() {
   // Make output directory and simple hists for examples
   system("mkdir -p ./plots");
 
+  /*
   vector<string> labels = {"ppref, loose", "ppref, nominal", "ppref, tight", "ppref, 2017", "uncorrected"};
   vector<string> inputFiles = {
       "output/output_20250708_Skim_ppref2024_all_Loose.root",
@@ -22,6 +23,13 @@ void plotFancy() {
       "output/output_20250708_Skim_ppref2024_all_noTrack.root"
   };
   const char* output = "plots/output_20250708_Skim_ppref2024_all_trackWeightingsOverlay";
+  */
+
+  vector<string> labels = {"PPRefZeroBiasPlusForward4"};
+  vector<string> inputFiles = {
+      "output/20250715_analysis_ppref2024_all_leadingPtGT3.root"
+  };
+  const char* output = "plots/20250715_analysis_ppref2024_all_leadingPtGT3";
 
   vector<TH1*> hNEvtPassCuts, hNTrkPassCuts, hTrkPt, hTrkEta, hMult, hVZ_pf, hTrkWeight;
   vector<TH2*> hTrkPtEta;
@@ -69,7 +77,7 @@ void plotFancy() {
       "Internal", // (optional) Add a subheader to the CMS header
       false
   );
-  AddUPCHeader(pad1, "5.26 TeV", "pp ref");
+  AddUPCHeader(pad1, "5.36 TeV", "pp ref");
   pad1->Update();
 
   /*
@@ -106,7 +114,7 @@ void plotFancy() {
       "Internal", // (optional) Add a subheader to the CMS header
       false
   );
-  AddUPCHeader(pad_ratio, "5.26 TeV", "pp ref");
+  AddUPCHeader(pad_ratio, "5.36 TeV", "pp ref");
   pad_ratio->Update();
 
   /*
@@ -130,16 +138,21 @@ void plotFancy() {
     ex2Canvas, {hNEvtPassCuts[0]}, "", {labels[0]},
     {cmsRed}, {0}, {cmsBlack}, {0},
     "", -1, -1,
-    "Events passed", 0, 160e6,
+    "Events passed", 0, 120e6,
     false, false, true
   );
+
+  // print bin contents to command line
+  for (int i = 1; i <= hNEvtPassCuts[0]->GetNbinsX(); i++) {
+    std::cout << "Bin " << i << ": " << std::fixed << std::setprecision(0) << hNEvtPassCuts[0]->GetBinContent(i) << std::endl;
+  }
 
   AddCMSHeader(
     pad_Nevt,      // Provide the TPad
     "Internal", // (optional) Add a subheader to the CMS header
     true
   );
-  AddUPCHeader(pad_Nevt, "5.26 TeV", "pp ref");
+  AddUPCHeader(pad_Nevt, "5.36 TeV", "pp ref");
   pad_Nevt->Update();
 
   // That's it!
@@ -162,7 +175,7 @@ void plotFancy() {
     "Internal", // (optional) Add a subheader to the CMS header
     true
   );
-  AddUPCHeader(pad_eta, "5.26 TeV", "pp ref");
+  AddUPCHeader(pad_eta, "5.36 TeV", "pp ref");
   pad_eta->Update();
 
   // That's it!
@@ -194,7 +207,7 @@ void plotFancy() {
     "Internal", // (optional) Add a subheader to the CMS header
     true
   );
-  AddUPCHeader(pad_weights, "5.26 TeV", "pp ref");
+  AddUPCHeader(pad_weights, "5.36 TeV", "pp ref");
 
   ex4Canvas->SaveAs(Form("%s_weights.pdf", output));
 

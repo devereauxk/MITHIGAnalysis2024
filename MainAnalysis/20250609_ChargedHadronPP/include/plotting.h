@@ -351,17 +351,19 @@ TPad* plotCMSSimple(TCanvas* c, vector<TH1*> hists, const char* title, vector<st
     vector<Int_t> linecolors, vector<Int_t> linestyles, vector<Int_t> markercolors, vector<Int_t> markerstyles,
     const char* xTitle, double xmin, double xmax,
     const char* yTitle, double ymin, double ymax,
-    bool logx = false, bool logy = false, bool binnums = false) {
+    bool logx = false, bool logy = false,
+    bool binnums = false) {
 
     // Get the canvas pad to pass to other functions
     TPad* pad1 = (TPad*) c->GetPad(0);
     pad1->cd();
-    if (logy) pad1->SetLogy();
+    logy ? pad1->SetLogy() : pad1->SetLogy(0);
+    logx ? pad1->SetLogx() : pad1->SetLogx(0);
     
     // >>> Apply the CMS TDR style <<<
     SetTDRStyle();
 
-    TLegend* leg = new TLegend(0.55, 0.7, 0.78, 0.85);
+    TLegend* leg = new TLegend(0.25, 0.7, 0.68, 0.85);
     leg->SetBorderSize(0);
     leg->SetFillStyle(0);
     leg->SetTextFont(42);
@@ -395,11 +397,11 @@ TPad* plotCMSSimple(TCanvas* c, vector<TH1*> hists, const char* title, vector<st
 
         hist->SetLineColor(linecolors[i]);
         if (linestyles[i] == 0) hist->SetLineStyle(1);
-        else hist->SetLineStyle(linestyles[i]);
+        else if (linestyles[i] > 0) hist->SetLineStyle(linestyles[i]);
         hist->SetMarkerColor(markercolors[i]);
         hist->SetMarkerStyle(markerstyles[i]);
         if (linestyles[i] == 0) hist->SetLineWidth(3);
-        else hist->SetLineWidth(2);
+        else if (linestyles[i] > 0) hist->SetLineWidth(2);
 
         hist->GetXaxis()->SetTitle(xTitle);
         hist->GetXaxis()->SetRangeUser(xmin, xmax);
@@ -424,9 +426,11 @@ TPad* plotCMSSimple(TCanvas* c, vector<TH1*> hists, const char* title, vector<st
 
         if (binnums) hist->Draw("SAME TEXT0");
         else if (linestyles[i] == 0) hist->Draw("SAME");
+        else if (linestyles[i] == -1) hist->Draw("P SAME");
         else hist->Draw("HIST SAME");
         
         if (linestyles[i] == 0) leg->AddEntry(hist, Form("%s", labels[i].c_str()), "pl");
+        else if (linestyles[i] == -1) leg->AddEntry(hist, Form("%s", labels[i].c_str()), "p");
         else leg->AddEntry(hist, Form("%s", labels[i].c_str()), "l");
     }
     leg->Draw("SAME");
@@ -440,7 +444,14 @@ TPad* plotCMSRatio(vector<TH1*> hists, const char* title, vector<string> labels,
     const char* xTitle, double xmin, double xmax,
     const char* yTitle, double ymin, double ymax,
     const char* rTitle, double rmin, double rmax,
-    int baseline = 0, bool logy = false) {
+    int baseline = 0, bool logx = false, bool logy = false,
+    bool errorBars = true) {
+
+    // linestyle options
+    // -1: no line, only markers [homemade]
+    // 0: solid histogram with point in center
+    // 1: solid histogram
+    // 2: dashed histogram
 
     // Get the canvas pad to pass to other functions
     // Leave a 50% larger border around the figure within the canvas
@@ -448,10 +459,12 @@ TPad* plotCMSRatio(vector<TH1*> hists, const char* title, vector<string> labels,
     TPad *pad1 = new TPad(title, title, border, 0.25 + border, 1.0 - border, 1.0 - border);
     pad1->SetBottomMargin(0);
     logy ? pad1->SetLogy() : pad1->SetLogy(0);
+    logx ? pad1->SetLogx() : pad1->SetLogx(0);
     pad1->Draw();
     TPad *pad2 = new TPad(title, title, border, border, 1.0 - border, 0.25 + border);
     pad2->SetTopMargin(0);
     pad2->SetBottomMargin(0.2);
+    logx ? pad2->SetLogx() : pad2->SetLogx(0);
     pad2->Draw();
     
     // >>> Apply the CMS TDR style <<<
@@ -490,13 +503,14 @@ TPad* plotCMSRatio(vector<TH1*> hists, const char* title, vector<string> labels,
 
         TH1* hist = hists[i];
 
-        hist->SetLineColor(linecolors[i]);
+        if (linestyles[i] == -1) hist->SetLineColorAlpha(0, 0);
+        else hist->SetLineColor(linecolors[i]);
         if (linestyles[i] == 0) hist->SetLineStyle(1);
-        else hist->SetLineStyle(linestyles[i]);
+        else if (linestyles[i] > 0) hist->SetLineStyle(linestyles[i]);
         hist->SetMarkerColor(markercolors[i]);
         hist->SetMarkerStyle(markerstyles[i]);
         if (linestyles[i] == 0) hist->SetLineWidth(3);
-        else hist->SetLineWidth(2);
+        else if (linestyles[i] > 0) hist->SetLineWidth(2);
 
         hist->GetXaxis()->SetTitle(xTitle);
         hist->GetXaxis()->SetRangeUser(xmin, xmax);
@@ -521,9 +535,11 @@ TPad* plotCMSRatio(vector<TH1*> hists, const char* title, vector<string> labels,
         }
 
         if (linestyles[i] == 0) hist->Draw("SAME");
+        else if (linestyles[i] == -1) hist->Draw("P SAME");
         else hist->Draw("HIST SAME");
         
         if (linestyles[i] == 0) leg->AddEntry(hist, Form("%s", labels[i].c_str()), "pl");
+        else if (linestyles[i] == -1) leg->AddEntry(hist, Form("%s", labels[i].c_str()), "p");
         else leg->AddEntry(hist, Form("%s", labels[i].c_str()), "l");
 
         pad2->cd();
@@ -541,9 +557,20 @@ TPad* plotCMSRatio(vector<TH1*> hists, const char* title, vector<string> labels,
             hRatio->GetYaxis()->SetTitleOffset(0.5);
             hRatio->SetLineColor(linecolors[i]);
             hRatio->SetLineStyle(linestyles[i]);
+            hRatio->SetLineWidth(2);
             hRatio->Draw("HIST SAME");
 
-            TLine *line = new TLine(xmin, 1, xmax, 1);
+            // Draw error bars on the ratio plot if requested
+            if (errorBars) {
+                setErrors(hRatio, hist, hists.at(baseline));
+                hRatio->Draw("E SAME");
+            } else {
+                hRatio->Draw("HIST SAME");
+            }
+
+            double xlow = hRatio->GetXaxis()->GetBinLowEdge(hRatio->GetXaxis()->GetFirst());
+            double xhigh = hRatio->GetXaxis()->GetBinUpEdge(hRatio->GetXaxis()->GetLast());
+            TLine *line = new TLine(xlow, 1, xhigh, 1);
             line->SetLineColor(kGray+2);
             line->SetLineStyle(2);
             line->Draw("SAME");

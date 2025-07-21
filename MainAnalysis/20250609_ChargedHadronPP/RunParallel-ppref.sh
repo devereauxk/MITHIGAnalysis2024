@@ -4,11 +4,11 @@ DATE=$(date +%Y%m%d)
 source clean.sh
 
 MAXCORES=30 # too many parallel cores can cause event loss, increase with caution!
-NFILES=1 # number of files to cap the processing at, if -1 processess all files
+NFILES=-1 # number of files to cap the processing at, if -1 processess all files
 # set =1 for just first file, =2 for first two files, etc.
 
-NAME="${DATE}_analysis_ppref2024_all"
-PATHSAMPLE="/data00/kdeverea/OOsamples/Skims/output_20250703_Skim_ppref2024_all"
+NAME="${DATE}_analysis_ppref2024_all_VZ15"
+PATHSAMPLE="/data00/kdeverea/OOsamples/Skims/output_20250715_Skim_ppref2024_all_noEvtSel"
 # set your output directory here
 OUTPUT="output/$NAME"
 MERGEDOUTPUT="output/$NAME.root"
@@ -28,11 +28,12 @@ mkdir -p $OUTPUT
 
 # Loop through each file in the file list
 COUNTER=0
-for FILEPATH in $(ls $PATHSAMPLE | grep 'output'); do
-
+for FILE in $(ls $PATHSAMPLE | grep 'output'); do
     if [ $NFILES -gt 0 ] && [ $COUNTER -ge $NFILES ]; then
         break
     fi
+
+    FILEPATH="$PATHSAMPLE/$FILE"
 
     echo ./ProcessSingleFile-ppref.sh $FILEPATH $COUNTER $OUTPUT
     ./ProcessSingleFile-ppref.sh $FILEPATH $COUNTER $OUTPUT &

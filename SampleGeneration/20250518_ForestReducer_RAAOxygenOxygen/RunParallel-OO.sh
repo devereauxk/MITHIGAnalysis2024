@@ -3,8 +3,8 @@ DATE=$(date +%Y%m%d)
 
 source clean.sh
 
-MAXCORES=1  # too many parallel cores can cause event loss, increase with caution!
-NFILES=40 # number of files to cap the processing at, if -1 processess all files
+MAXCORES=40  # too many parallel cores can cause event loss, increase with caution!
+NFILES=1 # number of files to cap the processing at, if -1 processess all files
 DOGENLEVEL=0
 ISDATA=1
 SAMPLETYPE=-1 # 0 for HIJING 00, 1 for Starlight SD, 2 for Starlight DD, 4 for HIJING alpha-O, -1 for data

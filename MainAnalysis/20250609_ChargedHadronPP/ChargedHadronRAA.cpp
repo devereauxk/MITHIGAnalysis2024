@@ -38,26 +38,24 @@ bool eventSelection(const ChargedHadronRAATreeMessenger *MChargedHadronRAA, Para
 
   hNEvtPassCuts->Fill(1); // Total events
 
-  if (par.IsData && !par.IsPP && !MChargedHadronRAA->HLT_OxyZeroBias_v1) return false;
-  hNEvtPassCuts->Fill(2); // HLT trigger
+  if (par.MinLeadingTrackPt > 0.0 && MChargedHadronRAA->leadingPtEta1p0_sel < par.MinLeadingTrackPt) return false;
+  hNEvtPassCuts->Fill(2); // Leading track pT > MinLeadingTrackPt
 
-  if (MChargedHadronRAA->ClusterCompatibilityFilter == false) return false;
-  hNEvtPassCuts->Fill(3); // Centrality filter
+  //if (MChargedHadronRAA->ClusterCompatibilityFilter == false) return false;
+  //hNEvtPassCuts->Fill(3); // Centrality filter
 
   if (MChargedHadronRAA->PVFilter == false) return false;
-  hNEvtPassCuts->Fill(4); // Primary vertex filter
+  hNEvtPassCuts->Fill(3); // Primary vertex filter  
 
-  if (MChargedHadronRAA->isFakeVtx) return false;
-  hNEvtPassCuts->Fill(5); // Not a fake vertex
+  //if (MChargedHadronRAA->isFakeVtx) return false;
+  //hNEvtPassCuts->Fill(5); // Not a fake vertex
+
+  //if (MChargedHadronRAA->nTracksVtx < 0) return false;
+  //hNEvtPassCuts->Fill(6); // Number of tracks in vertex
 
   // using VZ as found from pTSumVtx method (skim) rather than particle flow method used in the forest
   if (fabs(MChargedHadronRAA->VZ_pf) >= 15.0) return false;
-  hNEvtPassCuts->Fill(6); // Vertex Z position within range
-
-  if (MChargedHadronRAA->nTracksVtx < 0) return false;
-  hNEvtPassCuts->Fill(7); // Number of tracks in vertex
-  
-  if (par.MinLeadingTrackPt > 0.0 && MChargedHadronRAA->leadingPtEta1p0_sel < par.MinLeadingTrackPt) return false;
+  hNEvtPassCuts->Fill(4); // Vertex Z position within range
 
   return true;
 }
@@ -67,34 +65,65 @@ bool eventSelection(const ChargedHadronRAATreeMessenger *MChargedHadronRAA, Para
 //============================================================//
 bool trackSelection(const ChargedHadronRAATreeMessenger *MChargedHadronRAA, unsigned long j, Parameters &par,TH1D* hNTrkPassCuts) {
 
-  hNTrkPassCuts->Fill(1); // Total tracks considered
+  //hNTrkPassCuts->Fill(1); // Total tracks considered
 
   if (j >= MChargedHadronRAA->trkPt->size()) return false;
-  hNTrkPassCuts->Fill(2); // Total tracks
+  //hNTrkPassCuts->Fill(2); // Total tracks
 
   if (fabs(MChargedHadronRAA->trkCharge->at(j)) != 1) return false;
-  hNTrkPassCuts->Fill(3); // Charge = 1
+  //hNTrkPassCuts->Fill(3); // Charge = 1
 
   if (MChargedHadronRAA->highPurity->at(j) == false) return false;
-  hNTrkPassCuts->Fill(4); // High purity
+  //hNTrkPassCuts->Fill(4); // High purity
 
   if (MChargedHadronRAA->trkPt->at(j) < par.MinTrackPt) return false; // changed from vipuls
-  hNTrkPassCuts->Fill(5); // pT > 0.1 GeV/c
+  //hNTrkPassCuts->Fill(5); // pT > 0.1 GeV/c
 
   double RelativeUncertainty = MChargedHadronRAA->trkPtError->at(j) / MChargedHadronRAA->trkPt->at(j);
   if (MChargedHadronRAA->trkPt->at(j) > 10 && RelativeUncertainty > 0.1) return false;
-  hNTrkPassCuts->Fill(6); // Relative uncertainty < 10%
+  //hNTrkPassCuts->Fill(6); // Relative uncertainty < 10%
 
   if (fabs(MChargedHadronRAA->trkDxyAssociatedVtx->at(j)) / MChargedHadronRAA->trkDxyErrAssociatedVtx->at(j) > 3) return false;
-  hNTrkPassCuts->Fill(7); // Dxy < 3 sigma
+  //hNTrkPassCuts->Fill(7); // Dxy < 3 sigma
 
   if(fabs(MChargedHadronRAA->trkDzAssociatedVtx->at(j)) / MChargedHadronRAA->trkDzErrAssociatedVtx->at(j) > 3) return false;
-  hNTrkPassCuts->Fill(8); // Dz < 3 sigma
+  //hNTrkPassCuts->Fill(8); // Dz < 3 sigma
 
   if (MChargedHadronRAA->trkPt->at(j) > par.MaxTrackPt) return false;
-  hNTrkPassCuts->Fill(9); // pT < 500 GeV/c
+  //hNTrkPassCuts->Fill(9); // pT < 500 GeV/c
 
   return true;
+}
+
+int getMultiplicity(const ChargedHadronRAATreeMessenger *MChargedHadronRAA, Parameters &par, float eta) {
+
+  int mult = 0;
+  
+  for (unsigned long j = 0; j < MChargedHadronRAA->trkPt->size(); j++) {
+    if (trackSelection(MChargedHadronRAA, j, par, nullptr) && 
+        fabs(MChargedHadronRAA->trkEta->at(j)) < eta) {
+      mult++;
+    }
+  }
+
+  return mult;
+}
+
+float getEventCorrection(ChargedHadronRAATreeMessenger *MChargedHadronRAA, TH1D* eventSelectionEfficiency) {
+
+  float mult = MChargedHadronRAA->multiplicityEta2p4;
+
+  int bin = eventSelectionEfficiency->FindBin(mult);
+  if (mult < eventSelectionEfficiency->GetXaxis()->GetXmin() ||
+      mult > eventSelectionEfficiency->GetXaxis()->GetXmax())
+    return 1.0;
+
+  double eff = eventSelectionEfficiency->GetBinContent(bin);
+  if (eff <= 0)
+    return 1.0;
+
+  return 1.0 / eff;
+
 }
 
 
@@ -104,12 +133,13 @@ bool trackSelection(const ChargedHadronRAATreeMessenger *MChargedHadronRAA, unsi
 class DataAnalyzer {
 public:
   TFile *inf, *outf;
-  TH1D *hTrkPt, *hTrkEta, *hMult;
+  TH1D *hTrkPt, *hTrkEta;
   TH1D *hNEvtPassCuts, *hNTrkPassCuts, *hTrkWeight;
   TH2D *hTrkWeightPt, *hTrkWeightEta;
   TH2D *hTrkPtEta;
   TH3D *hVXYZ;
-  TH1D *hVZ_pf;
+  TH1D *hVZ_pf, *hTrkPt_noSel;
+  TH1D *hLeadingTrkPt, *hLeadingTrkPt_noSel, *hMult, *hMult_noSel, *hMult_oneVtx, *hMult_noSel_oneVtx, *hMult_oneVtx_Eta1p5, *hMult_noSel_oneVtx_Eta1p5;
   ChargedHadronRAATreeMessenger *MChargedHadronRAA;
   string title;
 
@@ -131,33 +161,45 @@ public:
     outf->cd();
 
     hTrkPt = new TH1D(Form("hTrkPt%s", title.c_str()), "", nPtBins_log, pTBins_log);
+    hTrkPt_noSel = new TH1D(Form("hTrkPt_noSel%s", title.c_str()), "", nPtBins_log, pTBins_log);
     hTrkEta = new TH1D(Form("hTrkEta%s", title.c_str()), "", 50, -3.0, 3.0);
-    hMult = new TH1D(Form("hMult%s", title.c_str()), "Multiplicity", 100, 0, 200);
     hTrkPtEta = new TH2D(Form("hTrkPtEta%s", title.c_str()), "", nPtBins, pTBins_fine, 50, -4.0, 4.0);
     hVXYZ = new TH3D(Form("hVXYZ%s", title.c_str()), "Vertex XYZ position", 100, -30.0, 30.0, 100, -30.0, 30.0, 100, -30.0, 30.0);
     hVZ_pf = new TH1D(Form("hVZ_pf%s", title.c_str()), "Vertex Z position (PF)", 100, -30.0, 30.0);
     hTrkWeight = new TH1D(Form("hTrkWeight%s", title.c_str()), "Track Weight", 100, 1, 1.7);
     hTrkWeightPt = new TH2D(Form("hTrkWeightPt%s", title.c_str()), "Track Weight vs pT", nPtBins_log, pTBins_log, 100, 1, 1.7);
     hTrkWeightEta = new TH2D(Form("hTrkWeightEta%s", title.c_str()), "Track Weight vs #eta", 50, -3.0, 3.0, 100, 1, 1.7);
+    hLeadingTrkPt = new TH1D(Form("hLeadingTrkPt%s", title.c_str()), "Leading Track pT", nPtBins_log, pTBins_log);
+    hLeadingTrkPt_noSel = new TH1D(Form("hLeadingTrkPt_noSel%s", title.c_str()), "Leading Track pT (no selection)", nPtBins_log, pTBins_log);
+    hMult = new TH1D(Form("hMult%s", title.c_str()), "Multiplicity", 200, 0, 200);
+    hMult_noSel = new TH1D(Form("hMult_noSel%s", title.c_str()), "Multiplicity (no selection)", 200, 0, 200);
+    hMult_oneVtx = new TH1D(Form("hMult_oneVtx%s", title.c_str()), "Multiplicity (one vertex)", 200, 0, 200);
+    hMult_oneVtx_Eta1p5 = new TH1D(Form("hMult_oneVtx_Eta1p5%s", title.c_str()), "Multiplicity (one vertex, |#eta| < 1.0)", 200, 0, 200);
+    hMult_noSel_oneVtx = new TH1D(Form("hMult_noSel_oneVtx%s", title.c_str()), "Multiplicity (no selection, one vertex)", 200, 0, 200);
+    hMult_noSel_oneVtx_Eta1p5 = new TH1D(Form("hMult_noSel_oneVtx_Eta1p5%s", title.c_str()), "Multiplicity (no selection, one vertex, |#eta| < 1.0)", 200, 0, 200);
 
     hTrkPt->Sumw2();
     hTrkEta->Sumw2();
     hTrkPtEta->Sumw2();
     hMult->Sumw2();
+    hMult_noSel->Sumw2();
+    hMult_oneVtx->Sumw2();
+    hMult_noSel_oneVtx->Sumw2();
+    hMult_oneVtx_Eta1p5->Sumw2();
+    hMult_noSel_oneVtx_Eta1p5->Sumw2();
     hVXYZ->Sumw2();
     hVZ_pf->Sumw2();
     hTrkWeight->Sumw2();
     hTrkWeightPt->Sumw2();
     hTrkWeightEta->Sumw2();
+    hLeadingTrkPt->Sumw2();
+    hLeadingTrkPt_noSel->Sumw2();
 
-    hNEvtPassCuts = new TH1D("hNEvtPassCuts", "Number of events passing cuts", 7, 0.5, 7.5);
+    hNEvtPassCuts = new TH1D("hNEvtPassCuts", "Number of events passing cuts", 4, 0.5, 4.5);
     hNEvtPassCuts->GetXaxis()->SetBinLabel(1, "Total Events");
-    hNEvtPassCuts->GetXaxis()->SetBinLabel(2, "+ HLT_OxyZeroBias_v1");
-    hNEvtPassCuts->GetXaxis()->SetBinLabel(3, "+ CC");
-    hNEvtPassCuts->GetXaxis()->SetBinLabel(4, "+ PV");
-    hNEvtPassCuts->GetXaxis()->SetBinLabel(5, "+ !isFakeVtx");
-    hNEvtPassCuts->GetXaxis()->SetBinLabel(6, "+ abs(VZ)<15");
-    hNEvtPassCuts->GetXaxis()->SetBinLabel(7, "+ nTrk>=0");
+    hNEvtPassCuts->GetXaxis()->SetBinLabel(2, "+ min leading track pT");
+    hNEvtPassCuts->GetXaxis()->SetBinLabel(3, "+ Primary Vertex Filter");
+    hNEvtPassCuts->GetXaxis()->SetBinLabel(4, "+ abs(VZ)<15");
     hNEvtPassCuts->Sumw2();
 
     hNTrkPassCuts = new TH1D("hNTrkPassCuts", "Number of tracks passing cuts", 9, 0.5, 9.5);
@@ -172,6 +214,13 @@ public:
     hNTrkPassCuts->GetXaxis()->SetBinLabel(9, "+ pT < 500 GeV/c");
     hNTrkPassCuts->Sumw2();
 
+    // load event selection efficiency histogram
+    TH1D* eventSelectionEfficiency = nullptr;
+    if (par.UseEventWeight && par.EventCorrectionFile != "") {
+      TFile *eventEffFile = TFile::Open(par.EventCorrectionFile.c_str());
+      eventSelectionEfficiency = (TH1D*)eventEffFile->Get("hMultEff");
+    }
+
     par.printParameters();
     unsigned long nEntry = MChargedHadronRAA->GetEntries() * par.scaleFactor;
     ProgressBar Bar(cout, nEntry);
@@ -181,7 +230,7 @@ public:
     // event loop
     for (unsigned long i = 0; i < nEntry; i++) {
       MChargedHadronRAA->GetEntry(i);
-      if (i % 1000 == 0) {
+      if (!par.HideProgressBar && i % 1000 == 0) {
         Bar.Update(i);
         Bar.Print();
       }
@@ -189,7 +238,25 @@ public:
       // get event selection efficiency correction, and diffraction contamination correction
       float eventWeight = 1.0;
       if (par.UseEventWeight) {
-        eventWeight *= MChargedHadronRAA->eventWeight;
+        //eventWeight *= MChargedHadronRAA->eventWeight;
+        eventWeight *= getEventCorrection(MChargedHadronRAA, eventSelectionEfficiency);
+      }
+
+      // calculate multiplicity for |eta| < 1.5 by hand since skim doesnt have it
+      int multiplicityEta1p5 = getMultiplicity(MChargedHadronRAA, par, 1.5);
+
+      // fill without event selection
+      hLeadingTrkPt_noSel->Fill(MChargedHadronRAA->leadingPtEta1p0_sel);
+      hMult_noSel->Fill(MChargedHadronRAA->multiplicityEta2p4);
+      if (MChargedHadronRAA->nVtx == 1 && !MChargedHadronRAA->isFakeVtx && fabs(MChargedHadronRAA->VZ) < 15.0) {
+        hMult_noSel_oneVtx_Eta1p5->Fill(multiplicityEta1p5);
+        hMult_noSel_oneVtx->Fill(MChargedHadronRAA->multiplicityEta2p4);
+      }
+
+      // track loop, no evt selection
+      for (unsigned long j = 0; j < MChargedHadronRAA->trkPt->size(); j++) {
+        if (fabs(MChargedHadronRAA->trkEta->at(j)) > 1.0) continue;
+        hTrkPt_noSel->Fill(MChargedHadronRAA->trkPt->at(j));
       }
 
       // event selection criteria
@@ -199,9 +266,14 @@ public:
       }
 
       // event-level histograms
-      hMult->Fill(MChargedHadronRAA->multiplicityEta2p4, eventWeight);
       hVXYZ->Fill(MChargedHadronRAA->VX, MChargedHadronRAA->VY, MChargedHadronRAA->VZ, eventWeight);
       hVZ_pf->Fill(MChargedHadronRAA->VZ_pf, eventWeight);
+      hLeadingTrkPt->Fill(MChargedHadronRAA->leadingPtEta1p0_sel);
+      hMult->Fill(MChargedHadronRAA->multiplicityEta2p4);
+      if (MChargedHadronRAA->nVtx == 1 && !MChargedHadronRAA->isFakeVtx && fabs(MChargedHadronRAA->VZ) < 15.0) {
+        hMult_oneVtx_Eta1p5->Fill(multiplicityEta1p5);
+        hMult_oneVtx->Fill(MChargedHadronRAA->multiplicityEta2p4);
+      }
 
       // track loop
       for (unsigned long j = 0; j < MChargedHadronRAA->trkPt->size(); j++) {
@@ -247,6 +319,11 @@ public:
     smartWrite(hTrkPt);
     smartWrite(hTrkEta);
     smartWrite(hMult);
+    smartWrite(hMult_noSel);
+    smartWrite(hMult_oneVtx);
+    smartWrite(hMult_noSel_oneVtx);
+    smartWrite(hMult_oneVtx_Eta1p5);
+    smartWrite(hMult_noSel_oneVtx_Eta1p5);
     smartWrite(hTrkPtEta);
     smartWrite(hTrkWeight);
     smartWrite(hVXYZ);
@@ -255,6 +332,9 @@ public:
     smartWrite(hNTrkPassCuts);
     smartWrite(hTrkWeightPt);
     smartWrite(hTrkWeightEta);
+    smartWrite(hLeadingTrkPt);
+    smartWrite(hLeadingTrkPt_noSel);
+    smartWrite(hTrkPt_noSel);
   }
 
 private:
@@ -262,6 +342,11 @@ private:
     delete hTrkPt;
     delete hTrkEta;
     delete hMult;
+    delete hMult_noSel;
+    delete hMult_oneVtx;
+    delete hMult_noSel_oneVtx;
+    delete hMult_oneVtx_Eta1p5;
+    delete hMult_noSel_oneVtx_Eta1p5;
     delete hTrkPtEta;
     delete hTrkWeight;
     delete hVXYZ;
@@ -270,6 +355,9 @@ private:
     delete hNTrkPassCuts;
     delete hTrkWeightPt;
     delete hTrkWeightEta;
+    delete hLeadingTrkPt;
+    delete hLeadingTrkPt_noSel;
+    delete hTrkPt_noSel;
   }
 };
 
@@ -299,6 +387,8 @@ int main(int argc, char *argv[]) {
   // Removed HF flags
   // par.OnlineHFAND     = CL.GetDouble("OnlineHFAND", -1);
   // par.OfflineHFAND    = CL.GetDouble("OfflineHFAND", -1);
+  par.EventCorrectionFile = CL.Get("EventCorrectionFile", ""); // File containing event correction factors
+  par.HideProgressBar = CL.GetBool("HideProgressBar", false);
 
   if (checkError(par))
     return -1;

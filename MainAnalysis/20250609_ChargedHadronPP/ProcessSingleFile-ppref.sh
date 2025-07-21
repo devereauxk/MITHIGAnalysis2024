@@ -16,7 +16,10 @@ echo "Processing $file"
    --UseEventWeight false \
    --ApplyEventSelection true \
    --MinTrackPt 0.4 \
-   --ScaleFactor 1
+   --MinLeadingTrackPt 0.0 \
+   --ScaleFactor 1 \
+   --HideProgressBar false \
+   --EventCorrectionFile "plots/20250717_ppref2024_all_eventSelection_EventCorrection.root"
 wait
 
 sleep 0.1

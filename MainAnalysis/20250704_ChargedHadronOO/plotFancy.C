@@ -76,7 +76,7 @@ void plotFancy() {
       "Internal", // (optional) Add a subheader to the CMS header
       false
   );
-  AddUPCHeader(pad1, "5.26 TeV", "OO Run 394270");
+  AddUPCHeader(pad1, "5.36 TeV", "OO Run 394270");
   pad1->Update();
 
   /*
@@ -113,7 +113,7 @@ void plotFancy() {
       "Internal", // (optional) Add a subheader to the CMS header
       false
   );
-  AddUPCHeader(pad_ratio, "5.26 TeV", "OO Run 394270");
+  AddUPCHeader(pad_ratio, "5.36 TeV", "OO Run 394270");
   pad_ratio->Update();
 
   /*
@@ -146,7 +146,7 @@ void plotFancy() {
     "Internal", // (optional) Add a subheader to the CMS header
     true
   );
-  AddUPCHeader(pad_Nevt, "5.26 TeV", "OO Run 394270");
+  AddUPCHeader(pad_Nevt, "5.36 TeV", "OO Run 394270");
   pad_Nevt->Update();
 
   // That's it!
@@ -169,7 +169,7 @@ void plotFancy() {
     "Internal", // (optional) Add a subheader to the CMS header
     true
   );
-  AddUPCHeader(pad_eta, "5.26 TeV", "OO Run 394270");
+  AddUPCHeader(pad_eta, "5.36 TeV", "OO Run 394270");
   pad_eta->Update();
 
   // That's it!
@@ -201,7 +201,7 @@ void plotFancy() {
     "Internal", // (optional) Add a subheader to the CMS header
     true
   );
-  AddUPCHeader(pad_weights, "5.26 TeV", "OO Run 394270");
+  AddUPCHeader(pad_weights, "5.36 TeV", "OO Run 394270");
 
   ex4Canvas->SaveAs(Form("%s_trkWeight_vs_pt.pdf", output));
 
