@@ -101,7 +101,7 @@ void plotEventSelection() {
   // ===========================================================================
   TCanvas* c_mult_ratio = new TCanvas("c_mult_ratio", "", 800, 600);
 
-  TH1D* hMultEff = (TH1D*)hMult_oneVtx->Clone("hMultEff");
+  TH1D* hMultEff = (TH1D*)hMult_oneVtx->Clone("hEff");
   hMultEff->Divide(hMult_noSel_oneVtx);
   TH1D* hMultEff_Eta1p5 = (TH1D*)hMult_oneVtx_Eta1p5->Clone("hMultEff_Eta1p5");
   hMultEff_Eta1p5->Divide(hMult_noSel_oneVtx_Eta1p5);
