@@ -27,9 +27,9 @@ echo "Processing $FILE"
    --sampleType -1 \
    --DebugMode true \
    --TrackEfficiencyPath ${ProjectBase}/CommonCode/root/ \
-   --MakeEventWeight true \
-   --EvtSelCorrectionFile ${ProjectBase}/CommonCode/root/20250717_ppref2024_all_eventSelection_EventCorrection.root \
-   --HideProgressBar false
+   --MakeEventWeight false \
+   --EvtSelCorrectionFile ${ProjectBase}/CommonCode/root/20250723_Skim_ppref2024_Data_noEvtSel_EventCorrection.root \
+   --HideProgressBar true
 wait
 
 sleep 0.2

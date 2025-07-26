@@ -13,9 +13,13 @@ void plotEventSelection() {
   // Make output directory and simple hists for examples
   system("mkdir -p ./plots");
 
-  const char* output = "plots/20250717_ppref2024_all_eventSelection";
+  // ppref Data
+  TFile* fin = TFile::Open("output/output_20250723_Skim_ppref2024_Data_noEvtSel.root");
+  const char* output = "plots/20250723_Skim_ppref2024_Data_noEvtSel";
 
-  TFile* fin = TFile::Open("output/20250717_analysis_ppref2024_all.root");
+  // ppref MC
+  //TFile* fin = TFile::Open("output/20250723_Skim_ppref2024_Official_noEvtSel.root");
+  //const char* output = "plots/20250723_Skim_ppref2024_Official_noEvtSel";
 
   // ===========================================================================
   TCanvas* ex2Canvas = new TCanvas("ex2Canvas", "", 800, 600);
@@ -132,6 +136,7 @@ void plotEventSelection() {
   pad_mult_ratio->SaveAs(Form("%s_MultRatio.pdf", output));
 
   // print value of the correction for all bins 10<mult<70
+  /*
   for (int i = 1; i <= hMultEff->GetNbinsX(); ++i) {
     double mult = hMultEff->GetBinCenter(i);
     double eff = hMultEff->GetBinContent(i);
@@ -140,6 +145,7 @@ void plotEventSelection() {
       cout << "Mult: " << mult << ", Efficiency: " << eff << " +/- " << eff_err << endl;
     }
   }
+  */
 
   // save mult ratio as Fraction of Events Selected as a function of multiplicity
   // correction factor should be 1/bin content
@@ -147,40 +153,5 @@ void plotEventSelection() {
   fout->cd();
   hMultEff->Write();
   fout->Close();
-  
-  // ===========================================================================
-  TCanvas* c_trackPt = new TCanvas("c_trackPt", "", 800, 600);
-
-  TH1D* hTrkPt = (TH1D*)fin->Get("hTrkPt");
-  TH1D* hTrkPt_noSel = (TH1D*)fin->Get("hTrkPt_noSel");
-
-  TFile* fin_DataDrivenCorrection = TFile::Open("output/20250717_analysis_ppref2024_all_DataDrivenCorrection.root");
-  TH1D* hTrkPt_DataDrivenCorrection = (TH1D*)fin_DataDrivenCorrection->Get("hTrkPt");
-  hTrkPt_DataDrivenCorrection->SetName("hTrkPt_DataDrivenCorrection");
-
-  divideByWidth(hTrkPt);
-  divideByWidth(hTrkPt_noSel);
-  divideByWidth(hTrkPt_DataDrivenCorrection);
-
-  TPad* pad_trackPt = (TPad*) plotCMSRatio(
-    {hTrkPt, hTrkPt_DataDrivenCorrection, hTrkPt_noSel}, "", {"selected events", "data-driven correction", "no event selection"},
-    {cmsRed, cmsBlue, cmsBlack}, {1, 1, -1}, {cmsBlack, cmsBlack, cmsBlack}, {0, 0, 20},
-    "p_{T}", 0.5, 50,
-    "dN/dp_{T}", 1, 1e12,
-    "Fraction of Events Selected  ", 0.96, 1.04,
-    2,
-    true, true, true
-  );
-
-  AddCMSHeader(
-    pad_trackPt,      // Provide the TPad
-    "Internal", // (optional) Add a subheader to the CMS header
-    true
-  );
-
-  AddUPCHeader(pad_trackPt, "5.36 TeV", "pp ref");
-  pad_trackPt->Update();
-
-  c_trackPt->SaveAs(Form("%s_TrackPt.pdf", output));
 
 }

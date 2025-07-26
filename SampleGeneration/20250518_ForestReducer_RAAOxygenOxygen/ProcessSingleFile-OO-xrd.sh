@@ -38,7 +38,7 @@ wait
    --TrackEfficiencyPath ${ProjectBase}/CommonCode/root/ \
    --MakeEventWeight false \
    --EvtSelCorrectionFile ${ProjectBase}/CommonCode/root/EventSelEffFile-OO.root \
-   --HideProgressBar false
+   --HideProgressBar true
 wait
 
 sleep 0.2

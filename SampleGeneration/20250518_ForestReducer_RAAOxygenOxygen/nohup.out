@@ -1,0 +1,8 @@
+CMSSW environment is located at /home/kdeverea/CMSSW_13_2_4/src
+CMSSW environment is set up
+/home/kdeverea/MITHIGAnalysis2024/SampleGeneration/20250518_ForestReducer_RAAOxygenOxygen
+mkdir -p library
+mkdir -p binary
+g++ source/DrawRandom.cpp -Iinclude -c -fpic -o library/DrawRandom.o -I/ -std=c++11
+g++ source/TauHelperFunctions3.cpp -Iinclude -c -o library/TauHelperFunctions3.o -I/ -std=c++11
+make: *** [makefile:13: library/TauHelperFunctions3.o] Interrupt

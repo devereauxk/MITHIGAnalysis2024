@@ -17,6 +17,8 @@ using namespace std;
 #include "parameter.h" // Parameters for the analysis
 #include "utilities.h" // Utility functions for the analysis
 
+#include "eventSelectionCorrection.h"
+
 // Define binnings
 
 const Int_t nPtBins = 37;
@@ -218,7 +220,7 @@ public:
     TH1D* eventSelectionEfficiency = nullptr;
     if (par.UseEventWeight && par.EventCorrectionFile != "") {
       TFile *eventEffFile = TFile::Open(par.EventCorrectionFile.c_str());
-      eventSelectionEfficiency = (TH1D*)eventEffFile->Get("hMultEff");
+      eventSelectionEfficiency = (TH1D*)eventEffFile->Get("hEff");
     }
 
     par.printParameters();
@@ -235,12 +237,13 @@ public:
         Bar.Print();
       }
 
-      // get event selection efficiency correction, and diffraction contamination correction
+      // get event selection efficiency correction
       float eventWeight = 1.0;
       if (par.UseEventWeight) {
         //eventWeight *= MChargedHadronRAA->eventWeight;
         eventWeight *= getEventCorrection(MChargedHadronRAA, eventSelectionEfficiency);
       }
+      //cout<< "Event weight: " << eventWeight << endl;
 
       // calculate multiplicity for |eta| < 1.5 by hand since skim doesnt have it
       int multiplicityEta1p5 = getMultiplicity(MChargedHadronRAA, par, 1.5);
@@ -248,7 +251,7 @@ public:
       // fill without event selection
       hLeadingTrkPt_noSel->Fill(MChargedHadronRAA->leadingPtEta1p0_sel);
       hMult_noSel->Fill(MChargedHadronRAA->multiplicityEta2p4);
-      if (MChargedHadronRAA->nVtx == 1 && !MChargedHadronRAA->isFakeVtx && fabs(MChargedHadronRAA->VZ) < 15.0) {
+      if (MChargedHadronRAA->nVtx == 1 && !MChargedHadronRAA->isFakeVtx) {
         hMult_noSel_oneVtx_Eta1p5->Fill(multiplicityEta1p5);
         hMult_noSel_oneVtx->Fill(MChargedHadronRAA->multiplicityEta2p4);
       }
@@ -270,7 +273,7 @@ public:
       hVZ_pf->Fill(MChargedHadronRAA->VZ_pf, eventWeight);
       hLeadingTrkPt->Fill(MChargedHadronRAA->leadingPtEta1p0_sel);
       hMult->Fill(MChargedHadronRAA->multiplicityEta2p4);
-      if (MChargedHadronRAA->nVtx == 1 && !MChargedHadronRAA->isFakeVtx && fabs(MChargedHadronRAA->VZ) < 15.0) {
+      if (MChargedHadronRAA->nVtx == 1 && !MChargedHadronRAA->isFakeVtx) {
         hMult_oneVtx_Eta1p5->Fill(multiplicityEta1p5);
         hMult_oneVtx->Fill(MChargedHadronRAA->multiplicityEta2p4);
       }
@@ -287,6 +290,7 @@ public:
           else if (par.TrackWeightSelection == 4) trkWeight *= MChargedHadronRAA->trackingEfficiency2017pp->at(j);
         }
         float eventTrkWeight = eventWeight * trkWeight;
+        //cout<<eventTrkWeight << endl;
 
         // track selection w/o eta cut
         if (!trackSelection(MChargedHadronRAA, j, par, hNTrkPassCuts)) continue;
@@ -302,7 +306,7 @@ public:
         hTrkPtEta->Fill(MChargedHadronRAA->trkPt->at(j), MChargedHadronRAA->trkEta->at(j), eventTrkWeight);
         hTrkWeightPt->Fill(MChargedHadronRAA->trkPt->at(j), trkWeight);
         hTrkWeightEta->Fill(MChargedHadronRAA->trkEta->at(j), trkWeight);
-        hTrkWeight->Fill(trkWeight);
+        hTrkWeight->Fill(eventTrkWeight);
 
       } // end of track loop
     } // end of event loop

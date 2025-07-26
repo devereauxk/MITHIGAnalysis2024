@@ -14,7 +14,7 @@ file="$FILEPATH"
    --IsPP true \
    --Fraction 1.0 \
    --ApplyTriggerRejection true \
-   --ApplyEventRejection true \
+   --ApplyEventRejection false \
    --ApplyTrackRejection true \
    --PFTree particleFlowAnalyser/pftree \
    --sampleType -1 \
