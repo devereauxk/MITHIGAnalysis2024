@@ -21,9 +21,9 @@ wait
    --Output ${OUTPUT}/output_${COUNTER}.root \
    --DoGenLevel $DOGENLEVEL \
    --IsData $ISDATA \
-   --CollisionSystem OO \
+   --CollisionSystem NeNe \
    --Fraction 1.0 \
-   --ApplyTriggerRejection 2 \
+   --ApplyTriggerRejection 1 \
    --ApplyEventRejection true \
    --ApplyTrackRejection true \
    --PFTree particleFlowAnalyser/pftree \

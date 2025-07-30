@@ -1,12 +1,12 @@
 #!/bin/bash
 DATE=$(date +%Y%m%d)
 
-source clean.sh
+#source clean.sh
 
-MAXCORES=40  # too many parallel cores can cause event loss, increase with caution!
-NFILES=-1 # number of files to cap the processing at, if -1 processess all files
+MAXCORES=20  # too many parallel cores can cause event loss, increase with caution!
+NFILES=1 # number of files to cap the processing at, if -1 processess all files
 DOGENLEVEL=0
-ISDATA=0
+ISDATA=1
 SAMPLETYPE=-1 # 0 for HIJING 00, 1 for Starlight SD, 2 for Starlight DD, 4 for HIJING alpha-O, -1 for data
 DEBUGMODE=1
 INCLUDEPF=1
@@ -16,24 +16,13 @@ INPUT_ON_XRD=1 # set to 1 if input files are on xrd, 0 if they are local
 XRDSERV="root://eoscms.cern.ch/" # eos xrootd server, path should start /store/group...
 
 # ============================================================
-# pp data, low pT PD
+# pp data, low pT PD, Vipul's filelist for crosscheck
 # ============================================================
-NAME="${DATE}_Skim_ppref2024_data_noEvtSel"
-PATHSAMPLE="/store/group/phys_heavyions/vpant/ppref2024output/PPRefZeroBiasPlusForward4/crab_ppref2024/250324_080237/0001"
+NAME="${DATE}_Skim_ppref2024_data_CROSSCHECK"
+FILELIST="PPRefZeroBiasPlusForward4.txt"
 
 # set your output directory here
-OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0001"
-MERGEDOUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0001_merged.root"
-
-# ============================================================
-# pp MC, official minbias
-# ============================================================
-#NAME="${DATE}_Skim_ppref2024_MinBias_TuneCP5_5p36TeV-pythia8_noEvtSel"
-#PATHSAMPLE="/eos/cms/store/group/phys_heavyions/kdeverea/MinBias_TuneCP5_5p36TeV-pythia8/MinBias_TuneCP5_5p36TeV-pythia8/crab_MinBias_TuneCP5_5p36TeV-pythia8/250726_203015/0001"
-
-# set your output directory here
-#OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0001"
-#MERGEDOUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0001_merged.root"
+OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME"
 
 
 
@@ -53,7 +42,7 @@ mkdir -p $OUTPUT
 
 # Loop through each file in the file list
 COUNTER=0
-for FILEPATH in $(xrdfs $XRDSERV ls $PATHSAMPLE | grep 'HiForestMiniAOD'); do
+while IFS= read -r FILEPATH; do
 
     if [ $NFILES -gt 0 ] && [ $COUNTER -ge $NFILES ]; then
         break
@@ -66,9 +55,5 @@ for FILEPATH in $(xrdfs $XRDSERV ls $PATHSAMPLE | grep 'HiForestMiniAOD'); do
 
     wait_for_slot
     ((COUNTER++))
-done
+done < $FILELIST
 wait
-
-hadd $MERGEDOUTPUT $OUTPUT/output_*.root
-echo "All done!"
-echo "Merged output file: $MERGEDOUTPUT"

@@ -16,24 +16,25 @@ INPUT_ON_XRD=1 # set to 1 if input files are on xrd, 0 if they are local
 XRDSERV="root://eoscms.cern.ch/" # eos xrootd server, path should start /store/group...
 
 # ============================================================
-# pp data, low pT PD
+# NeNe data, PD1
 # ============================================================
-NAME="${DATE}_Skim_ppref2024_data_noEvtSel"
-PATHSAMPLE="/store/group/phys_heavyions/vpant/ppref2024output/PPRefZeroBiasPlusForward4/crab_ppref2024/250324_080237/0001"
-
-# set your output directory here
-OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0001"
-MERGEDOUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0001_merged.root"
-
-# ============================================================
-# pp MC, official minbias
-# ============================================================
-#NAME="${DATE}_Skim_ppref2024_MinBias_TuneCP5_5p36TeV-pythia8_noEvtSel"
-#PATHSAMPLE="/eos/cms/store/group/phys_heavyions/kdeverea/MinBias_TuneCP5_5p36TeV-pythia8/MinBias_TuneCP5_5p36TeV-pythia8/crab_MinBias_TuneCP5_5p36TeV-pythia8/250726_203015/0001"
+#NAME="${DATE}_Skim_NeNe_IonPhysics4_AllPtV1_0716LynnTest"
+#PATHSAMPLE="/store/group/phys_heavyions/xirong/Run3_NeonRAA/PromptForest/IonPhysics4/crab_NeNe_IonPhysics4_AllPtV1_0716LynnTest/250716_184809/0001"
 
 # set your output directory here
 #OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0001"
 #MERGEDOUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0001_merged.root"
+
+
+# ============================================================
+# NeNe MC, private HIJING
+# ============================================================
+NAME="${DATE}_Skim_MinBias_Hijing_NeNe_5362GeV"
+PATHSAMPLE="/eos/cms/store/group/phys_heavyions/xirong/Run3_NeonRAA/MCForest/MinBias_Hijing_NeNe_5362GeV/crab_Nene_HIJING_5362GeV_v2/250727_012338/0000"
+
+# set your output directory here
+OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0000"
+MERGEDOUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/$NAME.root"
 
 
 
@@ -53,15 +54,15 @@ mkdir -p $OUTPUT
 
 # Loop through each file in the file list
 COUNTER=0
-for FILEPATH in $(xrdfs $XRDSERV ls $PATHSAMPLE | grep 'HiForestMiniAOD'); do
+for FILEPATH in $(xrdfs $XRDSERV ls $PATHSAMPLE | grep 'HiForest'); do
 
     if [ $NFILES -gt 0 ] && [ $COUNTER -ge $NFILES ]; then
         break
     fi
 
     if (( $INPUT_ON_XRD == 1 )); then
-        echo ./ProcessSingleFile-ppref-xrd.sh $FILEPATH $COUNTER $OUTPUT $DOGENLEVEL $ISDATA $SAMPLETYPE $DEBUGMODE $INCLUDEPF $XRDSERV $MAXCORES &
-        ./ProcessSingleFile-ppref-xrd.sh $FILEPATH $COUNTER $OUTPUT $DOGENLEVEL $ISDATA $SAMPLETYPE $DEBUGMODE $INCLUDEPF $XRDSERV $MAXCORES &
+        echo ./ProcessSingleFile-NeNe-xrd.sh "$FILEPATH" $COUNTER $OUTPUT $DOGENLEVEL $ISDATA $SAMPLETYPE $DEBUGMODE $INCLUDEPF $XRDSERV $MAXCORES &
+        ./ProcessSingleFile-NeNe-xrd.sh "$FILEPATH" $COUNTER $OUTPUT $DOGENLEVEL $ISDATA $SAMPLETYPE $DEBUGMODE $INCLUDEPF $XRDSERV $MAXCORES &
     fi
 
     wait_for_slot
