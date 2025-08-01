@@ -7,3 +7,5 @@ Samples
 *.jpg
 *.jpeg
 *.o
+*.log
+*.txt

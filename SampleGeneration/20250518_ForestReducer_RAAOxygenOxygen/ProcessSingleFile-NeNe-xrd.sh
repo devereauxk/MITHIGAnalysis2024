@@ -23,7 +23,7 @@ wait
    --IsData $ISDATA \
    --CollisionSystem NeNe \
    --Fraction 1.0 \
-   --ApplyTriggerRejection 1 \
+   --ApplyTriggerRejection 2 \
    --ApplyEventRejection true \
    --ApplyTrackRejection true \
    --PFTree particleFlowAnalyser/pftree \

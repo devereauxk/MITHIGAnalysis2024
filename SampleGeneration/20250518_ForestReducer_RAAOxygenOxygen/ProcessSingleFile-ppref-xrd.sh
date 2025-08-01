@@ -33,7 +33,7 @@ wait
    --includePFMode $INCLUDEPF \
    --TrackEfficiencyPath ${ProjectBase}/CommonCode/root/ \
    --MakeEventWeight false \
-   --HideProgressBar false
+   --HideProgressBar true
 wait
 
 sleep 0.2

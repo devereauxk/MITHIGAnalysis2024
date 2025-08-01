@@ -1,9 +1,11 @@
 #!/bin/bash
+DATE=$(date +%Y%m%d)
+
 source clean.sh
 
-INPUT=HiForest_2025OO_LowPtCfg_2210.root
-#INPUT=/eos/cms/store/group/phys_heavyions/jdlang/Run3_OxygenRAA/PromptForest/IonPhysics0/crab_OO_IonPhysics0_LowPtV2/250711_104114/0002/HiForest_2025OO_LowPtCfg_2210.root
-OUTPUT=tempOO.root
+NAME="${DATE}_Skim_2025OO_EmptyBX"
+INPUT=/eos/cms/store/group/phys_heavyions/jdlang/Run3_OxygenRAA/PromptForest_EmptyBX/EmptyBX/HiForest_2025OO_EmptyBX.root
+OUTPUT="/data00/kdeverea/OOsamples/Skims/$NAME.root"
 
 ./Execute --Input $INPUT \
    --Output $OUTPUT \
@@ -14,8 +16,10 @@ OUTPUT=tempOO.root
    --ApplyTriggerRejection 0 \
    --ApplyEventRejection false \
    --ApplyTrackRejection false \
+   --includePFMode false \
    --PFTree particleFlowAnalyser/pftree \
    --sampleType -1 \
    --DebugMode true \
    --includeL1EMU true \
-   --TrackEfficiencyPath ${ProjectBase}/CommonCode/root/
+   --TrackEfficiencyPath ${ProjectBase}/CommonCode/root/ \
+   --HideProgressBar false

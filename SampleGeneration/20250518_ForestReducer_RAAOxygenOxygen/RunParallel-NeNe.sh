@@ -18,23 +18,23 @@ XRDSERV="root://eoscms.cern.ch/" # eos xrootd server, path should start /store/g
 # ============================================================
 # NeNe data, PD1
 # ============================================================
-#NAME="${DATE}_Skim_NeNe_IonPhysics4_AllPtV1_0716LynnTest"
-#PATHSAMPLE="/store/group/phys_heavyions/xirong/Run3_NeonRAA/PromptForest/IonPhysics4/crab_NeNe_IonPhysics4_AllPtV1_0716LynnTest/250716_184809/0001"
+NAME="${DATE}_Skim_NeNe_IonPhysics4_AllPtV1_0716LynnTest"
+PATHSAMPLE="/store/group/phys_heavyions/xirong/Run3_NeonRAA/PromptForest/IonPhysics4/crab_NeNe_IonPhysics4_AllPtV1_0716LynnTest/250716_184809/0000"
 
 # set your output directory here
-#OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0001"
-#MERGEDOUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0001_merged.root"
+OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0000"
+MERGEDOUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0000_merged.root"
 
 
 # ============================================================
 # NeNe MC, private HIJING
 # ============================================================
-NAME="${DATE}_Skim_MinBias_Hijing_NeNe_5362GeV"
-PATHSAMPLE="/eos/cms/store/group/phys_heavyions/xirong/Run3_NeonRAA/MCForest/MinBias_Hijing_NeNe_5362GeV/crab_Nene_HIJING_5362GeV_v2/250727_012338/0000"
+#NAME="${DATE}_Skim_MinBias_Hijing_NeNe_5362GeV"
+#PATHSAMPLE="/eos/cms/store/group/phys_heavyions/xirong/Run3_NeonRAA/MCForest/MinBias_Hijing_NeNe_5362GeV/crab_Nene_HIJING_5362GeV_v2/250727_012338/0000"
 
 # set your output directory here
-OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0000"
-MERGEDOUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/$NAME.root"
+#OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0000"
+#MERGEDOUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/$NAME.root"
 
 
 

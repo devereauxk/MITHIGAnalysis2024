@@ -1,10 +1,10 @@
 #!/bin/bash
 DATE=$(date +%Y%m%d)
 
-#source clean.sh
+source clean.sh
 
-MAXCORES=20  # too many parallel cores can cause event loss, increase with caution!
-NFILES=1 # number of files to cap the processing at, if -1 processess all files
+MAXCORES=80  # too many parallel cores can cause event loss, increase with caution!
+NFILES=-1 # number of files to cap the processing at, if -1 processess all files
 DOGENLEVEL=0
 ISDATA=1
 SAMPLETYPE=-1 # 0 for HIJING 00, 1 for Starlight SD, 2 for Starlight DD, 4 for HIJING alpha-O, -1 for data
@@ -18,8 +18,8 @@ XRDSERV="root://eoscms.cern.ch/" # eos xrootd server, path should start /store/g
 # ============================================================
 # pp data, low pT PD, Vipul's filelist for crosscheck
 # ============================================================
-NAME="${DATE}_Skim_ppref2024_data_CROSSCHECK"
-FILELIST="PPRefZeroBiasPlusForward4.txt"
+NAME="${DATE}_Skim_ppref2024_data_CROSSCHECK_1000to9087"
+FILELIST="PPRefZeroBiasPlusForward4_1000on.txt"
 
 # set your output directory here
 OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME"
@@ -41,10 +41,11 @@ rm -rf $OUTPUT &> /dev/null
 mkdir -p $OUTPUT
 
 # Loop through each file in the file list
-COUNTER=0
+COUNTER=1000
+IFILE=0
 while IFS= read -r FILEPATH; do
 
-    if [ $NFILES -gt 0 ] && [ $COUNTER -ge $NFILES ]; then
+    if [ $NFILES -gt 0 ] && [ $IFILE -ge $NFILES ]; then
         break
     fi
 
@@ -55,5 +56,6 @@ while IFS= read -r FILEPATH; do
 
     wait_for_slot
     ((COUNTER++))
+    ((IFILE++))
 done < $FILELIST
 wait

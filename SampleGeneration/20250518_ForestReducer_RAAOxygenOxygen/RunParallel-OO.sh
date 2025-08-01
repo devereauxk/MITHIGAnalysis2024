@@ -3,10 +3,10 @@ DATE=$(date +%Y%m%d)
 
 source clean.sh
 
-MAXCORES=40  # too many parallel cores can cause event loss, increase with caution!
+MAXCORES=50  # too many parallel cores can cause event loss, increase with caution!
 NFILES=-1 # number of files to cap the processing at, if -1 processess all files
 DOGENLEVEL=0
-ISDATA=1
+ISDATA=0
 SAMPLETYPE=-1 # 0 for HIJING 00, 1 for Starlight SD, 2 for Starlight DD, 4 for HIJING alpha-O, -1 for data
 DEBUGMODE=1
 INCLUDEPF=1
@@ -18,12 +18,12 @@ XRDSERV="root://eoscms.cern.ch/" # eos xrootd server, path should start /store/g
 # ============================================================
 # OO data, low pT PD
 # ============================================================
-NAME="${DATE}_Skim_OO_IonPhysics0_LowPtV2_250711_104114"
-PATHSAMPLE="/store/group/phys_heavyions/jdlang/Run3_OxygenRAA/PromptForest/IonPhysics0/crab_OO_IonPhysics0_LowPtV2/250711_104114/0001"
+#NAME="${DATE}_Skim_OO_IonPhysics0_LowPtV2_250711_104114"
+#PATHSAMPLE="/store/group/phys_heavyions/jdlang/Run3_OxygenRAA/PromptForest/IonPhysics0/crab_OO_IonPhysics0_LowPtV2/250711_104114/0001"
 
 # set your output directory here
-OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0001"
-MERGEDOUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0001_merged.root"
+#OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0001"
+#MERGEDOUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0001_merged.root"
 
 
 # ============================================================
@@ -40,8 +40,31 @@ MERGEDOUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0001_merged.root"
 # ============================================================
 # OO MC, official Hijing
 # ============================================================
-#NAME="${DATE}_Skim_OO_MinBias_OO_5p36TeV_hijing"
+NAME="${DATE}_Skim_MinBias_Hijing_OO_5362GeV"
+PATHSAMPLE="/store/group/phys_heavyions/jdlang/Run3_OxygenRAA/MCForest/MinBias_Hijing_OO_5362GeV/crab_OO_MinBias_HIJING_5362GeV/250731_163809/0000/"
 #PATHSAMPLE="/store/group/phys_heavyions/xirong/Run3_OxygenRAA/MCForest/MinBias_OO_5p36TeV_hijing/crab_OO_HIJING_5362GeV_new2/250724_211743/0000"
+
+# set your output directory here
+OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0000"
+MERGEDOUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/$NAME.root"
+
+
+# ============================================================
+# OO MC, AMPT string melting
+# ============================================================
+#NAME="${DATE}_Skim_MinBias_AMPT_StringMelting_OO_5362GeV"
+#PATHSAMPLE="/store/group/phys_heavyions/jdlang/Run3_OxygenRAA/MCForest/MinBias_AMPT_StringMelting_OO_5362GeV/crab_OO_MinBias_AMPT_StringMelting_5362GeV/250731_180205/0000/"
+
+# set your output directory here
+#OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0000"
+#MERGEDOUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/$NAME.root"
+
+
+# ============================================================
+# OO MC, pythia+argantyr
+# ============================================================
+#NAME="${DATE}_Skim_MinBias_Pythia_Angantyr_OO_5362GeV"
+#PATHSAMPLE="/store/group/phys_heavyions/jdlang/Run3_OxygenRAA/MCForest/MinBias_Pythia_Angantyr_OO_5362GeV/crab_OO_MinBias_Pythia_Angantyr_5362GeV/250731_180135/0000/"
 
 # set your output directory here
 #OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0000"
