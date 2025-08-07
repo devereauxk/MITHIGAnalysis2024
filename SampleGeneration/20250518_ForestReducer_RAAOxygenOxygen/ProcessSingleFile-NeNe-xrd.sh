@@ -27,7 +27,6 @@ wait
    --ApplyEventRejection $APPLYEVENTREJECTION \
    --ApplyTrackRejection $APPLYTRACKREJECTION \
    --rejectTracksBelowPt $REJECTTRACKSBELOWPT \
-   --PFTree particleFlowAnalyser/pftree \
    --sampleType $SAMPLETYPE \
    --DebugMode false \
    --includeL1EMU false \

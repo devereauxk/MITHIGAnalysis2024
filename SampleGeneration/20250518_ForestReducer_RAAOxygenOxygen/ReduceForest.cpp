@@ -184,7 +184,7 @@ int main(int argc, char *argv[]) {
     MC_VZReweight = new MCReweighting(true, MC_CorrectionFile.c_str(), "VZReweight");
     MC_MultReweight = new MCReweighting(true, MC_CorrectionFile.c_str(), "MultReweight");
     MC_TrkPtReweight = new MCReweighting(true, MC_CorrectionFile.c_str(), "TrkPtReweight");
-    MC_TrkDCAReweight = new MCReweighting(true, MC_CorrectionFile.c_str(), "TrkDCAReweight");
+    // MC_TrkDCAReweight = new MCReweighting(true, MC_CorrectionFile.c_str(), "TrkDCAReweight");
   }
 
   // TRACK SPECIES REWEIGHTING
