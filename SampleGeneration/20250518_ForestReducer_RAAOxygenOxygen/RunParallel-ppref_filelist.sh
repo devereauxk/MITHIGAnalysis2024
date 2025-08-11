@@ -20,11 +20,9 @@ NAME="${DATE}_Skim_ppref2024_data_CROSSCHECK_1to9087"
 FILELIST="PPRefZeroBiasPlusForward4.txt"
 
 # set your output directory here
-OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME"
+OUTPUT="/data00/$USER/OOsamples/Skims/output_$NAME"
 
 
-
-rm $MERGEDOUTPUT &> /dev/null
 
 # Function to monitor active processes
 wait_for_slot() {
@@ -34,7 +32,6 @@ wait_for_slot() {
     done
 }
 
-echo "Forest sample path: $PATHSAMPLE"
 rm -rf $OUTPUT &> /dev/null
 mkdir -p $OUTPUT
 

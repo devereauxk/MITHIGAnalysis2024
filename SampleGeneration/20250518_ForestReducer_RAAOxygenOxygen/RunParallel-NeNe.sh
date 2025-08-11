@@ -21,7 +21,7 @@ NAME="${DATE}_Skim_NeNe_IonPhysics0_AllPtV1_0716LynnTest_ZeroBias"
 PATHSAMPLE="/eos/cms/store/group/phys_heavyions/xirong/Run3_NeonRAA/PromptForest/IonPhysics0/crab_NeNe_IonPhysics0_AllPtV1_0716LynnTest/250716_180522/0001"
 
 # set your output directory here
-OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0001"
+OUTPUT="/data00/$USER/OOsamples/Skims/output_$NAME/0001"
 
 
 # ============================================================
@@ -31,11 +31,9 @@ OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0001"
 #PATHSAMPLE="/eos/cms/store/group/phys_heavyions/xirong/Run3_NeonRAA/MCForest/MinBias_Hijing_NeNe_5362GeV/crab_Nene_HIJING_5362GeV_v2/250727_012338/0000"
 
 # set your output directory here
-#OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0000"
+#OUTPUT="/data00/$USER/OOsamples/Skims/output_$NAME/0000"
 
 
-
-rm $MERGEDOUTPUT &> /dev/null
 
 # Function to monitor active processes
 wait_for_slot() {

@@ -21,7 +21,7 @@ XRDSERV="root://eoscms.cern.ch/" # eos xrootd server, path should start /store/g
 #PATHSAMPLE="/store/group/phys_heavyions/jdlang/Run3_OxygenRAA/PromptForest/IonPhysics0/crab_OO_IonPhysics0_LowPtV2/250711_104114/0000"
 
 # set your output directory here
-#OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0004"
+#OUTPUT="/data00/$USER/OOsamples/Skims/output_$NAME/0004"
 
 
 # ============================================================
@@ -31,7 +31,7 @@ XRDSERV="root://eoscms.cern.ch/" # eos xrootd server, path should start /store/g
 #PATHSAMPLE="/store/group/phys_heavyions/jdlang/Run3_OxygenRAA/PromptForest/IonPhysics5/crab_OO_IonPhysics5_HighPtV2/250711_104159/0000"
 
 # set your output directory here
-#OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0000"
+#OUTPUT="/data00/$USER/OOsamples/Skims/output_$NAME/0000"
 
 
 # ============================================================
@@ -41,7 +41,7 @@ XRDSERV="root://eoscms.cern.ch/" # eos xrootd server, path should start /store/g
 #PATHSAMPLE="/eos/cms/store/group/phys_heavyions/xirong/Run3_OxygenRAA/MCForest/MinBias_OO_5p36TeV_hijing/crab_OO_HIJING_5362GeV_new2/250724_211743/0000"
 
 # set your output directory here
-#OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0000"
+#OUTPUT="/data00/$USER/OOsamples/Skims/output_$NAME/0000"
 
 
 # ============================================================
@@ -51,7 +51,7 @@ XRDSERV="root://eoscms.cern.ch/" # eos xrootd server, path should start /store/g
 #PATHSAMPLE="/eos/cms/store/group/phys_heavyions/kdeverea/Run3_OO_2025MC/QCD-dijet_Pthat-15_TuneCP5_OO_5p36TeV_pythia8/crab_Run3_OO_pythiahijing_official/250807_164006/0001"
 
 # set your output directory here
-#OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0001"
+#OUTPUT="/data00/$USER/OOsamples/Skims/output_$NAME/0001"
 
 
 # ============================================================
@@ -61,12 +61,9 @@ NAME="${DATE}_Skim_OO_5p36TeV_EmptyBX"
 PATHSAMPLE="/eos/cms/store/group/phys_heavyions/jdlang/Run3_OxygenRAA/PromptForest_EmptyBX/EmptyBX/crab_OO_EmptyBX/250807_200807/0000"
 
 # set your output directory here
-OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0000"
+OUTPUT="/data00/$USER/OOsamples/Skims/output_$NAME/0000"
 
 
-
-
-rm $MERGEDOUTPUT &> /dev/null
 
 # Function to monitor active processes
 wait_for_slot() {
@@ -76,7 +73,6 @@ wait_for_slot() {
     done
 }
 
-echo "Forest sample path: $PATHSAMPLE"
 rm -rf $OUTPUT &> /dev/null
 mkdir -p $OUTPUT
 

@@ -23,8 +23,7 @@ NAME="${DATE}_Skim_ppref2024_data"
 PATHSAMPLE="/store/group/phys_heavyions/vpant/ppref2024output/PPRefZeroBiasPlusForward4/crab_ppref2024/250324_080237/0001"
 
 # set your output directory here
-OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0001"
-MERGEDOUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0001_merged.root"
+OUTPUT="/data00/$USER/OOsamples/Skims/output_$NAME/0001"
 
 # ============================================================
 # pp MC, official minbias
@@ -33,12 +32,9 @@ MERGEDOUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0001_merged.root"
 #PATHSAMPLE="/eos/cms/store/group/phys_heavyions/kdeverea/MinBias_TuneCP5_5p36TeV-pythia8/MinBias_TuneCP5_5p36TeV-pythia8/crab_MinBias_TuneCP5_5p36TeV-pythia8/250726_203015/0001"
 
 # set your output directory here
-#OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0001"
-#MERGEDOUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0001_merged.root"
+#OUTPUT="/data00/$USER/OOsamples/Skims/output_$NAME/0001"
 
 
-
-rm $MERGEDOUTPUT &> /dev/null
 
 # Function to monitor active processes
 wait_for_slot() {
@@ -48,7 +44,6 @@ wait_for_slot() {
     done
 }
 
-echo "Forest sample path: $PATHSAMPLE"
 rm -rf $OUTPUT &> /dev/null
 mkdir -p $OUTPUT
 
@@ -68,6 +63,4 @@ for FILEPATH in $(xrdfs $XRDSERV ls $PATHSAMPLE | grep 'HiForestMiniAOD'); do
 done
 wait
 
-hadd $MERGEDOUTPUT $OUTPUT/output_*.root
-echo "All done!"
-echo "Merged output file: $MERGEDOUTPUT"
+echo "Processing COMPLETE"

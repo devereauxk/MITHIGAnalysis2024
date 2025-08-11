@@ -21,11 +21,9 @@ NAME="${DATE}_Skim_OO_IonPhysics0_LowPtV2_250711_104114_MB_v2"
 FILELIST="OO_forests_lowpt1.txt"
 
 # set your output directory here
-OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/"
+OUTPUT="/data00/$USER/OOsamples/Skims/output_$NAME/"
 
 
-
-rm $MERGEDOUTPUT &> /dev/null
 
 # Function to monitor active processes
 wait_for_slot() {
