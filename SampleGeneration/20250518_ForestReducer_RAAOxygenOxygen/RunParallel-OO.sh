@@ -4,11 +4,11 @@ DATE=$(date +%Y%m%d)
 source clean.sh
 
 MAXCORES=40  # too many parallel cores can cause event loss, increase with caution!
-NFILES=-1 # number of files to cap the processing at, if -1 processess all files
-ISDATA=0
-APPLYTRIGGERREJECTION=2 #  trigger = 0 for no rejection, 1 for ZeroBias, 2 for MinBias
-APPLYEVENTREJECTION=1
-APPLYTRACKREJECTION=1
+NFILES=1 # number of files to cap the processing at, if -1 processess all files
+ISDATA=1
+APPLYTRIGGERREJECTION=0 #  trigger = 0 for no rejection, 1 for ZeroBias, 2 for MinBias
+APPLYEVENTREJECTION=0
+APPLYTRACKREJECTION=0
 REJECTTRACKSBELOWPT=0.4
 SAMPLETYPE=-1 # 0 for HIJING 00, 1 for Starlight SD, 2 for Starlight DD, 4 for HIJING alpha-O, -1 for data
 INPUT_ON_XRD=1 # 0 for local files, 1 for xrd files
@@ -47,11 +47,22 @@ XRDSERV="root://eoscms.cern.ch/" # eos xrootd server, path should start /store/g
 # ============================================================
 # OO PYTIHA+HIJING embeded official
 # ============================================================
-NAME="${DATE}_Skim_MinBias_OO_5p36TeV_hijingpythia"
-PATHSAMPLE="/eos/cms/store/group/phys_heavyions/kdeverea/Run3_OO_2025MC/QCD-dijet_Pthat-15_TuneCP5_OO_5p36TeV_pythia8/crab_Run3_OO_pythiahijing_official/250807_164006/0001"
+#NAME="${DATE}_Skim_MinBias_OO_5p36TeV_hijingpythia"
+#PATHSAMPLE="/eos/cms/store/group/phys_heavyions/kdeverea/Run3_OO_2025MC/QCD-dijet_Pthat-15_TuneCP5_OO_5p36TeV_pythia8/crab_Run3_OO_pythiahijing_official/250807_164006/0001"
 
 # set your output directory here
-OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0001"
+#OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0001"
+
+
+# ============================================================
+# OO Data, EmptyBX
+# ============================================================
+NAME="${DATE}_Skim_OO_5p36TeV_EmptyBX"
+PATHSAMPLE="/eos/cms/store/group/phys_heavyions/jdlang/Run3_OxygenRAA/PromptForest_EmptyBX/EmptyBX/crab_OO_EmptyBX/250807_200807/0000"
+
+# set your output directory here
+OUTPUT="/data00/kdeverea/OOsamples/Skims/output_$NAME/0000"
+
 
 
 
